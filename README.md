@@ -25,9 +25,11 @@
 
 ## Time Tracking
 
-| Date       | Task                                           | Notes |
-| ---------- | ---------------------------------------------- | ----- |
-| 2026-06-23 | Learning: Variable, datatype, function in Dart | .     |
+| Date       | Task                                                  | Notes |
+| ---------- | ----------------------------------------------------- | ----- |
+| 2026-06-23 | Learning: Variable, datatype, function in Dart        | .     |
+| 2026-06-24 | Learning: Operators, branches, loops, classes in Dart | .     |
+| 2026-06-25 | Done learning in Dart, learning Flutter               | .     |
 
 ## Future Work
 
