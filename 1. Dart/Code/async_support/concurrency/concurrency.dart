@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 Future<void> main() async {
   // Async / await
   // No await -> A C (2 seconds) B
@@ -26,8 +28,17 @@ Future<void> main() async {
   );
   await for (final i in stream) {
     print(i);
-    if (i > 100) break;
+    if (i > 1) break;
   }
 
-  //
+  // Isolate.run()
+  Future<void> calculate() async {
+    final result = await Isolate.run(() {
+      return 1000000 * 1000000;
+    });
+
+    print(result);
+  }
+
+  calculate();
 }
