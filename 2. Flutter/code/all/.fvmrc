@@ -1,0 +1,6 @@
+{
+  "flutter": "3.44.1",
+  "updateVscodeSettings": true,
+  "updateGitIgnore": true,
+  "runPubGetOnSdkChanges": true
+}

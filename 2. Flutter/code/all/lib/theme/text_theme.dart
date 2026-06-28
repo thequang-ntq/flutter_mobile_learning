@@ -9,6 +9,9 @@ class MyTextTheme {
         bodyMedium: Typography.material2021().black.bodyMedium?.copyWith(
           fontSize: 15,
         ),
+        headlineLarge: Typography.material2021().black.headlineLarge?.copyWith(
+          fontWeight: FontWeight.w900,
+        ),
       );
 
   static final TextTheme darkTextTheme = Typography.material2021().white

@@ -1,6 +1,9 @@
+// import 'package:code_learning_flutter/cupertino/cupertino.dart';
+// import 'package:code_learning_flutter/setstate/setstate.dart';
+import 'package:code_learning_flutter/setstate/state_management/pages/login_page.dart';
 import 'package:code_learning_flutter/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:code_learning_flutter/material/material.dart';
+// import 'package:code_learning_flutter/material/material.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,7 +16,7 @@ class MyApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       title: "Flutter Demo",
-      home: MyMaterial(), // Change learning content here
+      home: LoginPage(), // Change learning content here
     );
   }
 }
