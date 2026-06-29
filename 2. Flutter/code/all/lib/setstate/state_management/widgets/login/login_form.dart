@@ -1,15 +1,15 @@
+// import 'package:code_learning_flutter/setstate/state_management/pages/catalog_page.dart';
 import 'package:flutter/material.dart';
 
-class MyForm extends StatefulWidget {
-  const MyForm({super.key, required this.width, required this.height});
-  final double width;
-  final double height;
+class LoginForm extends StatefulWidget {
+  const LoginForm({super.key, required this.onSubmit});
+  final VoidCallback onSubmit;
 
   @override
-  State<MyForm> createState() => _MyFormState();
+  State<LoginForm> createState() => _LoginFormState();
 }
 
-class _MyFormState extends State<MyForm> {
+class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final _usernameKey = GlobalKey<FormFieldState>();
   final _passwordKey = GlobalKey<FormFieldState>();
@@ -21,11 +21,9 @@ class _MyFormState extends State<MyForm> {
     });
   }
 
-  void _entered() {
+  void _submit() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Processing data")));
+      widget.onSubmit();
     }
   }
 
@@ -33,11 +31,14 @@ class _MyFormState extends State<MyForm> {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
+    final w = MediaQuery.of(context).size.width;
+    final h = MediaQuery.of(context).size.height;
 
     return Form(
       key: _formKey,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        spacing: h * 0.03,
         children: <Widget>[
           _buildFormField(
             context,
@@ -45,14 +46,13 @@ class _MyFormState extends State<MyForm> {
             fieldKey: _usernameKey,
             isPassword: false,
           ),
-          SizedBox(height: widget.height * 0.03),
           _buildFormField(
             context,
             fieldName: "password",
             fieldKey: _passwordKey,
             isPassword: true,
           ),
-          SizedBox(height: widget.height * 0.04),
+          SizedBox(height: h * 0.01),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: WidgetStatePropertyAll(colors.primary),
@@ -60,15 +60,10 @@ class _MyFormState extends State<MyForm> {
                 RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               ),
               padding: WidgetStatePropertyAll(
-                EdgeInsets.fromLTRB(
-                  widget.width * 0.07,
-                  widget.height * 0.008,
-                  widget.width * 0.07,
-                  widget.height * 0.008,
-                ),
+                EdgeInsets.fromLTRB(w * 0.07, h * 0.008, w * 0.07, h * 0.008),
               ),
             ),
-            onPressed: _entered,
+            onPressed: _submit,
             child: Text("Enter", style: text.headlineSmall),
           ),
         ],

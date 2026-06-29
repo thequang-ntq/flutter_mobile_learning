@@ -1,8 +1,16 @@
-import 'package:code_learning_flutter/setstate/state_management/widgets/my_form.dart';
+import 'package:code_learning_flutter/setstate/state_management/pages/catalog_page.dart';
+import 'package:code_learning_flutter/setstate/state_management/widgets/login/login_form.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
+
+  void _submit(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const CatalogPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,8 +19,8 @@ class LoginPage extends StatelessWidget {
 
   Widget _buildBody(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    double w = MediaQuery.of(context).size.width;
-    double h = MediaQuery.of(context).size.height;
+    final w = MediaQuery.of(context).size.width;
+    final h = MediaQuery.of(context).size.height;
 
     return Center(
       child: Padding(
@@ -30,9 +38,10 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _buildForm(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
-    double h = MediaQuery.of(context).size.height;
-
-    return MyForm(width: w, height: h);
+    return LoginForm(
+      onSubmit: () {
+        _submit(context);
+      },
+    );
   }
 }

@@ -12,6 +12,9 @@ class MyTextTheme {
         headlineLarge: Typography.material2021().black.headlineLarge?.copyWith(
           fontWeight: FontWeight.w900,
         ),
+        labelLarge: Typography.material2021().black.labelLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
       );
 
   static final TextTheme darkTextTheme = Typography.material2021().white
@@ -21,6 +24,12 @@ class MyTextTheme {
         ),
         bodyMedium: Typography.material2021().white.bodyMedium?.copyWith(
           fontSize: 15,
+        ),
+        headlineLarge: Typography.material2021().white.headlineLarge?.copyWith(
+          fontWeight: FontWeight.w900,
+        ),
+        labelLarge: Typography.material2021().white.labelLarge?.copyWith(
+          fontWeight: FontWeight.bold,
         ),
       );
 }

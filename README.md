@@ -11,6 +11,7 @@
     - [2026-06-25](#2026-06-25)
     - [2026-06-26](#2026-06-26)
     - [2026-06-28](#2026-06-28)
+    - [2026-06-29](#2026-06-29)
   - [UI Screenshots](#ui-screenshots)
   - [Time Tracking](#time-tracking)
   - [Future Work](#future-work)
@@ -50,6 +51,12 @@
    3.2. FileSystemException: Cannot create link, path = 'D:\Career\Trainee\NextGen\works\trello_nextgen_intern_mobile\2. 3.3.3. Flutter\code\all\.fvm\versions\3.44.1'(OS Error: A required privilege is not held by the client, error = 1314)
    -> Need Admin in terminal
 
+### 2026-06-29
+
+1. Create services for getting & processing data, model for storing data and notifier
+2. ChangeNotifierProvider in main.dart
+3. Expanded for ListView in Column
+
 ## UI Screenshots
 
 1. Simple state management app
@@ -71,6 +78,7 @@
 | 2026-06-25               | Done learning in Dart, learning: Widget, Stateless, Stateful in Flutter   | .     |
 | 2026-06-26               | Learning material, cupertino in Flutter, restructure project architecture | .     |
 | 2026-06-27 -> 2026-06-28 | Learning state management, fvm; do simple state management app in Flutter | .     |
+| 2026-06-29               | Continue doing simple state management app in Flutter                     | .     |
 
 ## Future Work
 
