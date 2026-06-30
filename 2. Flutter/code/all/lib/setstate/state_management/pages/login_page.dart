@@ -1,15 +1,12 @@
-import 'package:code_learning_flutter/setstate/state_management/pages/catalog_page.dart';
 import 'package:code_learning_flutter/setstate/state_management/widgets/login/login_form.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   void _submit(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const CatalogPage()),
-    );
+    context.go('/catalog');
   }
 
   @override

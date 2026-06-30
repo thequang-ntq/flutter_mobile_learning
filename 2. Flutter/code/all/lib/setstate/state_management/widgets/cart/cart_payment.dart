@@ -1,5 +1,6 @@
 import 'package:code_learning_flutter/setstate/state_management/models/cart_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CartPayment extends StatelessWidget {
   const CartPayment({super.key, required this.cart, required this.totalPrice});
@@ -8,7 +9,7 @@ class CartPayment extends StatelessWidget {
 
   void _buyCart(BuildContext context, CartModel cart) {
     cart.removeAll();
-    Navigator.of(context).pop();
+    context.pop();
   }
 
   @override

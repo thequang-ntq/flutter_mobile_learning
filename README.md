@@ -12,6 +12,7 @@
     - [2026-06-26](#2026-06-26)
     - [2026-06-28](#2026-06-28)
     - [2026-06-29](#2026-06-29)
+    - [2026-06-30](#2026-06-30)
   - [UI Screenshots](#ui-screenshots)
   - [Time Tracking](#time-tracking)
   - [Future Work](#future-work)
@@ -57,6 +58,18 @@
 2. ChangeNotifierProvider in main.dart
 3. Expanded for ListView in Column
 
+### 2026-06-30
+
+1. Fix code by mentor
+   1.1. Material app just once in root
+   -> Delete MaterialApp() in my_stateless and my_stateful
+   1.2. CatalogModal, CatalogService create new when build -> lost data & state
+   -> Change CatalogModel extends ChangeNotifier + notifyListeners(), add ChangeNotifierProvider in main for CatalogModel, Change catalog_list to Stateful + getAll in initState, Consumer<CatalogModel> for ListView
+   1.3. No extend ChangeNotifier, no calling notifyListener when change data. --> Consumer<CatalogModel> cannot rebuild
+   -> Fix in 1.2
+   1.4. Need route management for navigator (go_router)
+   -> Install go_router, create router/router.dart, create router (GoRouter), change Navigator to context.go/push/pop
+
 ## UI Screenshots
 
 1. Simple state management app
@@ -71,14 +84,15 @@
 
 ## Time Tracking
 
-| Date                     | Task                                                                      | Notes |
-| ------------------------ | ------------------------------------------------------------------------- | ----- |
-| 2026-06-23               | Learning: Variable, datatype, function in Dart                            | .     |
-| 2026-06-24               | Learning: Operators, branches, loops, classes in Dart                     | .     |
-| 2026-06-25               | Done learning in Dart, learning: Widget, Stateless, Stateful in Flutter   | .     |
-| 2026-06-26               | Learning material, cupertino in Flutter, restructure project architecture | .     |
-| 2026-06-27 -> 2026-06-28 | Learning state management, fvm; do simple state management app in Flutter | .     |
-| 2026-06-29               | Continue doing simple state management app in Flutter                     | .     |
+| Date                     | Task                                                                             | Notes |
+| ------------------------ | -------------------------------------------------------------------------------- | ----- |
+| 2026-06-23               | Learning: Variable, datatype, function in Dart                                   | .     |
+| 2026-06-24               | Learning: Operators, branches, loops, classes in Dart                            | .     |
+| 2026-06-25               | Done learning in Dart, learning: Widget, Stateless, Stateful in Flutter          | .     |
+| 2026-06-26               | Learning material, cupertino in Flutter, restructure project architecture        | .     |
+| 2026-06-27 -> 2026-06-28 | Learning state management, fvm; do simple state management app in Flutter        | .     |
+| 2026-06-29               | Continue doing simple state management app in Flutter, learning widget lifecycle | .     |
+| 2026-06-30               | Learning assets in Flutter, fix bugs for simple state management app             | .     |
 
 ## Future Work
 

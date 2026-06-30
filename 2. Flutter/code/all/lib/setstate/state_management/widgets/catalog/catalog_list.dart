@@ -1,12 +1,26 @@
 import 'package:code_learning_flutter/setstate/state_management/models/catalog_model.dart';
 import 'package:code_learning_flutter/setstate/state_management/models/item_model.dart';
-import 'package:code_learning_flutter/setstate/state_management/services/catalog_service.dart';
 import 'package:code_learning_flutter/setstate/state_management/widgets/catalog/catalog_item.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class CatalogList extends StatelessWidget {
+class CatalogList extends StatefulWidget {
   const CatalogList({super.key, required this.numberOfItem});
   final int numberOfItem;
+
+  @override
+  State<CatalogList> createState() => _CatalogListState();
+}
+
+class _CatalogListState extends State<CatalogList> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CatalogModel>().getAll(size: widget.numberOfItem);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,20 +34,24 @@ class CatalogList extends StatelessWidget {
   }
 
   Widget _buildList(BuildContext context) {
-    final catalog = CatalogModel(CatalogService());
-    catalog.getAll(size: numberOfItem);
-    final items = catalog.items;
     final h = MediaQuery.of(context).size.height;
 
-    return ListView.separated(
-      itemCount: items.length,
-      itemBuilder: (context, position) {
-        return _buildListItem(position: position, item: items[position]);
+    return Consumer<CatalogModel>(
+      builder: (context, catalog, _) {
+        return ListView.separated(
+          itemCount: catalog.items.length,
+          itemBuilder: (context, position) {
+            return _buildListItem(
+              position: position,
+              item: catalog.items[position],
+            );
+          },
+          separatorBuilder: (context, position) {
+            return SizedBox(height: h * 0.02);
+          },
+          physics: const ClampingScrollPhysics(),
+        );
       },
-      separatorBuilder: (context, position) {
-        return SizedBox(height: h * 0.02);
-      },
-      physics: const ClampingScrollPhysics(),
     );
   }
 

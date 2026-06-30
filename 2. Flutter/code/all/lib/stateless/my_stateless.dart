@@ -5,14 +5,12 @@ class MyStateless extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text("Learning stateless")),
-        body: Center(
-          child: ElevatedButton(
-            onPressed: () {},
-            child: Text("Learning stateless"),
-          ),
+    return Scaffold(
+      appBar: AppBar(title: Text("Learning stateless")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {},
+          child: Text("Learning stateless"),
         ),
       ),
     );

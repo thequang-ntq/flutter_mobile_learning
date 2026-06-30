@@ -22,29 +22,26 @@ class _MyStatefulState extends State<MyStateful> {
   @override
   Widget build(BuildContext context) {
     double h = MediaQuery.of(context).size.height * 0.02;
-    // double w = MediaQuery.of(context).size.width * 0.02;
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(title: Text(widget.title)),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text("Your score: "),
-              SizedBox(height: h),
-              Text("$_counter"),
-              SizedBox(height: h),
-              Text("$_resultCalc"),
-            ],
-          ),
+
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text("Your score: "),
+            SizedBox(height: h),
+            Text("$_counter"),
+            SizedBox(height: h),
+            Text("$_resultCalc"),
+          ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _incrementCounter,
-          tooltip: "Increment",
-          child: Icon(Icons.add),
-        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: "Increment",
+        child: Icon(Icons.add),
       ),
     );
   }

@@ -23,7 +23,6 @@ class CartPage extends StatelessWidget {
       backgroundColor: colors.surface,
       title: Text("Cart", style: text.headlineLarge),
       centerTitle: true,
-      // backgroundColor: colors.surface,
     );
   }
 

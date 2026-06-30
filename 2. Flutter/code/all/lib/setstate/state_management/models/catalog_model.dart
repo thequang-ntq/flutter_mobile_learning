@@ -2,8 +2,9 @@ import 'dart:collection';
 
 import 'package:code_learning_flutter/setstate/state_management/models/item_model.dart';
 import 'package:code_learning_flutter/setstate/state_management/services/catalog_service.dart';
+import 'package:flutter/material.dart';
 
-class CatalogModel {
+class CatalogModel extends ChangeNotifier {
   final CatalogService _service;
   CatalogModel(this._service);
   List<ItemModel> _items = [];
@@ -11,5 +12,6 @@ class CatalogModel {
 
   void getAll({required int size}) {
     _items = _service.getAll(size: size);
+    notifyListeners();
   }
 }
