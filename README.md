@@ -93,7 +93,7 @@
 | 2026-06-27 -> 2026-06-28 | Learning state management, fvm; do simple state management app in Flutter              | .     |
 | 2026-06-29               | Continue doing simple state management app in Flutter, learning widget lifecycle       | .     |
 | 2026-06-30               | Learning assets, navigation, form in Flutter, fix bugs for simple state management app | .     |
-| 2026-07-01               | Done learning Flutter, done learning REST API                                          | .     |
+| 2026-07-01               | Done learning Flutter, done learning REST, add code for http and dio                   | .     |
 
 ## Future Work
 
