@@ -84,16 +84,18 @@
 
 ## Time Tracking
 
-| Date                     | Task                                                                                   | Notes |
-| ------------------------ | -------------------------------------------------------------------------------------- | ----- |
-| 2026-06-23               | Learning: Variable, datatype, function in Dart                                         | .     |
-| 2026-06-24               | Learning: Operators, branches, loops, classes in Dart                                  | .     |
-| 2026-06-25               | Done learning in Dart, learning: Widget, Stateless, Stateful in Flutter                | .     |
-| 2026-06-26               | Learning material, cupertino in Flutter, restructure project architecture              | .     |
-| 2026-06-27 -> 2026-06-28 | Learning state management, fvm; do simple state management app in Flutter              | .     |
-| 2026-06-29               | Continue doing simple state management app in Flutter, learning widget lifecycle       | .     |
-| 2026-06-30               | Learning assets, navigation, form in Flutter, fix bugs for simple state management app | .     |
-| 2026-07-01               | Done learning Flutter, done learning REST, add code for http and dio                   | .     |
+| Date                     | Task                                                                                                    | Notes |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- | ----- |
+| 2026-06-23               | Learning: Variable, datatype, function in Dart                                                          | .     |
+| 2026-06-24               | Learning: Operators, branches, loops, classes in Dart                                                   | .     |
+| 2026-06-25               | Done learning in Dart, learning: Widget, Stateless, Stateful in Flutter                                 | .     |
+| 2026-06-26               | Learning material, cupertino in Flutter, restructure project architecture                               | .     |
+| 2026-06-27 -> 2026-06-28 | Learning state management, fvm; do simple state management app in Flutter                               | .     |
+| 2026-06-29               | Continue doing simple state management app in Flutter, learning widget lifecycle                        | .     |
+| 2026-06-30               | Learning assets, navigation, form in Flutter, fix bugs for simple state management app                  | .     |
+| 2026-07-01               | Done learning Flutter, done learning REST, add code for http and dio, learning riverpod, setup todo app | .     |
+| 2026-07-02               | Learning riverpod & shared preferences, setup todo app                                                  | .     |
+| 2026-07-03               | Do: HomePage for Todo App (List (Doing & Completed list), Search)                                       | .     |
 
 ## Future Work
 
