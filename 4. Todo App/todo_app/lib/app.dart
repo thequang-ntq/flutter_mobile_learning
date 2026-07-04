@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/router/app_router.dart';
+import 'package:todo_app/theme/app_theme.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -10,8 +11,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       routerConfig: AppRouter.appRouter,
       debugShowCheckedModeBanner: false,
-      // theme: AppTheme.lightTheme,
-      // darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       title: "Todo App",
     );

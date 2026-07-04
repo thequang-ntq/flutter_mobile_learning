@@ -6,9 +6,9 @@ class AppColorScheme {
   static final ColorScheme lightColorScheme = ColorScheme.fromSeed(
     seedColor: seedColor,
     brightness: Brightness.light,
-  );
+  ).copyWith(primary: seedColor);
   static final ColorScheme darkColorScheme = ColorScheme.fromSeed(
     seedColor: seedColor,
     brightness: Brightness.dark,
-  );
+  ).copyWith(primary: seedColor);
 }

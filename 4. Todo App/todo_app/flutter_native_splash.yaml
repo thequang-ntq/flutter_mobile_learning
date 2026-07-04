@@ -1,0 +1,11 @@
+flutter_native_splash:
+  # uncomment this if you want to disable this package for specific platform:
+  # android: false
+  # ios: false
+  # web: false
+  color: "#FFFFFF"
+  image: assets/images/logo.png
+
+  android_12:
+    color: "#FFFFFF"
+    image: assets/images/logo.png

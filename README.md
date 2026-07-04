@@ -95,7 +95,8 @@
 | 2026-06-30               | Learning assets, navigation, form in Flutter, fix bugs for simple state management app                  | .     |
 | 2026-07-01               | Done learning Flutter, done learning REST, add code for http and dio, learning riverpod, setup todo app | .     |
 | 2026-07-02               | Learning riverpod & shared preferences, setup todo app                                                  | .     |
-| 2026-07-03               | Do: HomePage for Todo App (List (Doing & Completed list), Search)                                       | .     |
+| 2026-07-03               | Do: Logo, SplashScreen, OnboardingPage, HomePage for Todo App (List (Doing & Completed list), Search)   | .     |
+| 2026-07-04               | Complete OnboardingPage UI for Todo App                                                                 | .     |
 
 ## Future Work
 
