@@ -11,6 +11,8 @@ class OnboardingSlideService {
     );
     final List<dynamic> jsonData = json.decode(jsonString);
 
-    return jsonData.map((e) => OnboardingSlideModel.fromJson(e)).toList();
+    return jsonData.map((e) {
+      return OnboardingSlideModel.fromJson(e);
+    }).toList();
   }
 }

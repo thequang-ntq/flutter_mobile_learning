@@ -13,10 +13,10 @@ class OnboardingSlideModel {
 
   factory OnboardingSlideModel.fromJson(Map<String, dynamic> json) {
     return OnboardingSlideModel(
-      position: json["position"],
-      imageUrl: json["imageUrl"],
-      title: json["title"],
-      detail: json["detail"],
+      position: json["position"] as int,
+      imageUrl: json["imageUrl"] as String,
+      title: json["title"] as String,
+      detail: json["detail"] as String,
     );
   }
 

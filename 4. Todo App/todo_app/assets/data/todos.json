@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "content": "Finish the Flutter onboarding screen",
+    "completed": false,
+    "timestamp": "2026-07-05T08:30:15"
+  },
+  {
+    "id": 2,
+    "content": "Buy groceries after work",
+    "completed": false,
+    "timestamp": "2026-07-05T10:45:32"
+  },
+  {
+    "id": 3,
+    "content": "Read 20 pages of a book",
+    "completed": false,
+    "timestamp": "2026-07-05T14:20:48"
+  },
+  {
+    "id": 4,
+    "content": "Reply to project emails",
+    "completed": true,
+    "timestamp": "2026-07-04T09:15:27"
+  },
+  {
+    "id": 5,
+    "content": "Complete the daily workout",
+    "completed": true,
+    "timestamp": "2026-07-04T18:05:11"
+  },
+  {
+    "id": 6,
+    "content": "Clean up the workspace",
+    "completed": true,
+    "timestamp": "2026-07-03T20:40:56"
+  }
+]

@@ -1,5 +1,6 @@
 class Constants {
-  static int numberOfSlides = 3;
+  Constants._();
+
   static String baseAssetUrl = "assets/images";
   static String baseJsonUrl = "assets/data";
 }
