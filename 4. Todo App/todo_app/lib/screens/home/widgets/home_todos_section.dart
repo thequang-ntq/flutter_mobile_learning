@@ -35,7 +35,7 @@ class HomeTodosSection extends ConsumerWidget {
     final selectedTodoIds = ref.watch(
       SelectionProvider.selectedTodoIdsProvider,
     );
-    final selectedTodoNotifier = ref.read(
+    final selectedTodoIdsNotifier = ref.read(
       SelectionProvider.selectedTodoIdsProvider.notifier,
     );
 
@@ -68,14 +68,14 @@ class HomeTodosSection extends ConsumerWidget {
                             _onLongPress(
                               isSelectionMode: isSelectionMode,
                               isSelectionModeNotifier: isSelectionModeNotifier,
-                              selectedTodoNotifier: selectedTodoNotifier,
+                              selectedTodoIdsNotifier: selectedTodoIdsNotifier,
                               todo: todo,
                             );
                           },
                           onTap: () {
                             _onTodoPressed(
                               isSelectionMode: isSelectionMode,
-                              selectedTodoNotifier: selectedTodoNotifier,
+                              selectedTodoIdsNotifier: selectedTodoIdsNotifier,
                               todo: todo,
                             );
                           },
@@ -96,7 +96,8 @@ class HomeTodosSection extends ConsumerWidget {
                               onPressed: () {
                                 _onTodoPressed(
                                   isSelectionMode: isSelectionMode,
-                                  selectedTodoNotifier: selectedTodoNotifier,
+                                  selectedTodoIdsNotifier:
+                                      selectedTodoIdsNotifier,
                                   todo: todo,
                                 );
                               },
@@ -172,22 +173,22 @@ class HomeTodosSection extends ConsumerWidget {
   void _onLongPress({
     required bool isSelectionMode,
     required IsSelectionModeNotifier isSelectionModeNotifier,
-    required SelectedTodoIdsNotifier selectedTodoNotifier,
+    required SelectedTodoIdsNotifier selectedTodoIdsNotifier,
     required TodoModel todo,
   }) {
     if (!isSelectionMode) {
       isSelectionModeNotifier.enable();
-      selectedTodoNotifier.add(todo.id);
+      selectedTodoIdsNotifier.add(todo.id);
     }
   }
 
   void _onTodoPressed({
     required bool isSelectionMode,
-    required SelectedTodoIdsNotifier selectedTodoNotifier,
+    required SelectedTodoIdsNotifier selectedTodoIdsNotifier,
     required TodoModel todo,
   }) {
     if (isSelectionMode) {
-      selectedTodoNotifier.toggle(todo.id);
+      selectedTodoIdsNotifier.toggle(todo.id);
       return;
     }
   }

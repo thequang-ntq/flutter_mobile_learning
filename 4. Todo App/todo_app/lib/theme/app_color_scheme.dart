@@ -12,6 +12,7 @@ class AppColorScheme {
         onPrimary: Color.fromARGB(255, 255, 255, 255),
         secondaryContainer: Color.fromARGB(255, 50, 174, 54),
         onSecondaryContainer: Color.fromARGB(255, 255, 255, 255),
+        outlineVariant: Color.fromARGB(0, 223, 223, 223),
       );
   static final ColorScheme darkColorScheme =
       ColorScheme.fromSeed(
@@ -23,5 +24,6 @@ class AppColorScheme {
         secondaryContainer: Color.fromARGB(255, 50, 174, 54),
         onSecondaryContainer: Color.fromARGB(255, 255, 255, 255),
         outline: Color.fromARGB(255, 255, 255, 255),
+        outlineVariant: Color.fromARGB(0, 58, 58, 58),
       );
 }

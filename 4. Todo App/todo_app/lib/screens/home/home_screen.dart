@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/providers/selection_provider.dart';
+import 'package:todo_app/providers/todo_provider.dart';
 import 'package:todo_app/screens/home/widgets/home_body.dart';
 import 'package:todo_app/screens/home/widgets/home_bottom_bar.dart';
 import 'package:todo_app/services/todo_service.dart';
@@ -148,16 +149,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final selectedTodoIds = ref.watch(
       SelectionProvider.selectedTodoIdsProvider,
     );
+    final todosNotifier = ref.read(TodoProvider.todosProvider.notifier);
 
     switch (action) {
       case "check":
-        for (final item in selectedTodoIds) {
-          TodoService.setStatus(id: item, setCompleted: true);
-        }
+        todosNotifier.setStatus(ids: selectedTodoIds, setCompleted: true);
       case "uncheck":
-        for (final item in selectedTodoIds) {
-          TodoService.setStatus(id: item, setCompleted: false);
-        }
+        todosNotifier.setStatus(ids: selectedTodoIds, setCompleted: false);
       case "delete":
         for (final item in selectedTodoIds) {
           TodoService.delete(item);

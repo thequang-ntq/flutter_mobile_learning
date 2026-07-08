@@ -100,7 +100,7 @@
 | 2026-07-05               | Do: HomePage UI for Todo App                                                                            | .     |
 | 2026-07-06               | Complete ShellPage, do HomePage UI for Todo App                                                         | .     |
 | 2026-07-07               | Do HomePage UI & logic for Todo App                                                                     | .     |
-| 2026-07-08               | Reactor code, complete HomeScreen & FormScreen UI for Todo App                                          | .     |
+| 2026-07-08               | Reactor code, complete HomeScreen & FormScreen UI, add todos & highlight provider for Todo App          | .     |
 
 ## Future Work
 
