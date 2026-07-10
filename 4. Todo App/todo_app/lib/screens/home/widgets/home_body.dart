@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/models/todo_model.dart';
+import 'package:todo_app/providers/toast_provider.dart';
 import 'package:todo_app/providers/todo_provider.dart';
 import 'package:todo_app/screens/home/widgets/home_list_type_row.dart';
 import 'package:todo_app/screens/home/widgets/home_search_section.dart';
@@ -47,6 +48,17 @@ class _HomeBodyState extends ConsumerState<HomeBody> {
 
   @override
   Widget build(BuildContext context) {
+    // Search when from FormPage to HomePage after add/edit, and searched before add/edit
+    ref.listen(ToastProvider.isFromFormPageProvider, (previous, next) {
+      if (!next) return;
+
+      ref
+          .read(TodoProvider.todosProvider(widget.typeSelected).notifier)
+          .refresh();
+
+      ref.read(ToastProvider.isFromFormPageProvider.notifier).state = false;
+    });
+
     return SafeArea(
       child: ValueListenableBuilder<Set<int>>(
         valueListenable: widget.selectedTodoIds,
@@ -104,10 +116,14 @@ class _HomeBodyState extends ConsumerState<HomeBody> {
   }
 
   // Clear search state (back to all tasks)
-  void _onClearSearchButtonPressed(SearchController controller) {
+  void _onClearSearchButtonPressed(SearchController controller) async {
     controller.clear();
 
     ref
+        .read(TodoProvider.todosProvider(widget.typeSelected).notifier)
+        .clearSearch();
+
+    await ref
         .read(TodoProvider.todosProvider(widget.typeSelected).notifier)
         .refresh();
 

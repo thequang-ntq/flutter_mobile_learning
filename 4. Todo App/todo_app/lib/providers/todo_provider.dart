@@ -7,6 +7,8 @@ import 'package:todo_app/services/todo_service.dart';
 
 class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
   final bool isCompleted;
+  String? _keyword;
+
   TodosNotifier(this.isCompleted);
 
   // Build -> Get all tasks
@@ -16,7 +18,13 @@ class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
   }
 
   Future<void> refresh() async {
-    state = AsyncData(await TodoService.getByStatus(isCompleted));
+    if (_keyword == null || _keyword!.isEmpty) {
+      state = AsyncData(await TodoService.getByStatus(isCompleted));
+    } else {
+      state = AsyncData(
+        await TodoService.search(keyword: _keyword!, isCompleted: isCompleted),
+      );
+    }
   }
 
   // Return a task by id
@@ -29,12 +37,18 @@ class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
     required String keyword,
     required bool isCompleted,
   }) async {
+    _keyword = keyword;
+
     final resultTodos = await TodoService.search(
       keyword: keyword,
       isCompleted: isCompleted,
     );
 
     state = AsyncData(resultTodos);
+  }
+
+  void clearSearch() {
+    _keyword = null;
   }
 
   // Clear list highlight ids before loops
@@ -69,7 +83,9 @@ class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
       }
 
       state = AsyncData(todos);
+
       await targetNotifier.refresh();
+      await refresh();
 
       idsNotifier.state = {...ids};
 

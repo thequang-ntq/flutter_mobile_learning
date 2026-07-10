@@ -5,4 +5,6 @@ class ToastProvider {
   static final toastProvider = StateProvider<NotificationMessage?>(
     (ref) => null,
   );
+
+  static final isFromFormPageProvider = StateProvider<bool>((ref) => false);
 }

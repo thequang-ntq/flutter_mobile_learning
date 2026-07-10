@@ -84,25 +84,26 @@
 
 ## Time Tracking
 
-| Date                     | Task                                                                                                                    | Notes |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ----- |
-| 2026-06-23               | Learning: Variable, datatype, function in Dart                                                                          | .     |
-| 2026-06-24               | Learning: Operators, branches, loops, classes in Dart                                                                   | .     |
-| 2026-06-25               | Done learning in Dart, learning: Widget, Stateless, Stateful in Flutter                                                 | .     |
-| 2026-06-26               | Learning material, cupertino in Flutter, restructure project architecture                                               | .     |
-| 2026-06-27 -> 2026-06-28 | Learning state management, fvm; do simple state management app in Flutter                                               | .     |
-| 2026-06-29               | Continue doing simple state management app in Flutter, learning widget lifecycle                                        | .     |
-| 2026-06-30               | Learning assets, navigation, form in Flutter, fix bugs for simple state management app                                  | .     |
-| 2026-07-01               | Done learning Flutter, done learning REST, add code for http and dio, learning riverpod, setup todo app                 | .     |
-| 2026-07-02               | Learning riverpod & shared preferences, setup todo app                                                                  | .     |
-| 2026-07-03               | Do: Logo, SplashScreen, OnboardingPage, HomePage for Todo App (List (Doing & Completed list), Search)                   | .     |
-| 2026-07-04               | Complete OnboardingPage UI for Todo App                                                                                 | .     |
-| 2026-07-05               | Do: HomePage UI for Todo App                                                                                            | .     |
-| 2026-07-06               | Complete ShellPage, do HomePage UI for Todo App                                                                         | .     |
-| 2026-07-07               | Do HomePage UI & logic for Todo App                                                                                     | .     |
-| 2026-07-08               | Refactor code, complete HomeScreen & FormScreen UI, add todos & highlight provider for Todo App                         | .     |
-| 2026-07-09               | Complete HomeScreen & FormScreen UI, change data OnboardingPage, fix logic for Todo App                                 | .     |
-| 2026-07-10               | Fix logic related to main functions: notify & highlight for add, check, delete; info when search not found for Todo App | .     |
+| Date                     | Task                                                                                                                        | Notes |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ----- |
+| 2026-06-23               | Learning: Variable, datatype, function in Dart                                                                              | .     |
+| 2026-06-24               | Learning: Operators, branches, loops, classes in Dart                                                                       | .     |
+| 2026-06-25               | Done learning in Dart, learning: Widget, Stateless, Stateful in Flutter                                                     | .     |
+| 2026-06-26               | Learning material, cupertino in Flutter, restructure project architecture                                                   | .     |
+| 2026-06-27 -> 2026-06-28 | Learning state management, fvm; do simple state management app in Flutter                                                   | .     |
+| 2026-06-29               | Continue doing simple state management app in Flutter, learning widget lifecycle                                            | .     |
+| 2026-06-30               | Learning assets, navigation, form in Flutter, fix bugs for simple state management app                                      | .     |
+| 2026-07-01               | Done learning Flutter, done learning REST, add code for http and dio, learning riverpod, setup todo app                     | .     |
+| 2026-07-02               | Learning riverpod & shared preferences, setup todo app                                                                      | .     |
+| 2026-07-03               | Do: Logo, SplashScreen, OnboardingPage, HomePage for Todo App (List (Doing & Completed list), Search)                       | .     |
+| 2026-07-04               | Complete OnboardingPage UI for Todo App                                                                                     | .     |
+| 2026-07-05               | Do: HomePage UI for Todo App                                                                                                | .     |
+| 2026-07-06               | Complete ShellPage, do HomePage UI for Todo App                                                                             | .     |
+| 2026-07-07               | Do HomePage UI & logic for Todo App                                                                                         | .     |
+| 2026-07-08               | Refactor code, complete HomeScreen & FormScreen UI, add todos & highlight provider for Todo App                             | .     |
+| 2026-07-09               | Complete HomeScreen & FormScreen UI, change data OnboardingPage, fix logic for Todo App                                     | .     |
+| 2026-07-10               | Fix logic related to main functions: notify & highlight for add, check, delete; info when search not found for Todo App     | .     |
+| 2026-07-11               | Fix logic related to main functions: add back to todo list when search before, check/uncheck still have status for Todo App | .     |
 
 ## Future Work
 

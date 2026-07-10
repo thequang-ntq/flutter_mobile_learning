@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/providers/selection_provider.dart';
+import 'package:todo_app/providers/toast_provider.dart';
 import 'package:todo_app/providers/todo_provider.dart';
 import 'package:todo_app/screens/form/widgets/form_body.dart';
 
@@ -76,6 +77,8 @@ class _FormScreenState extends ConsumerState<FormScreen> {
           .add(contentFieldController.text);
       ref.read(SelectionProvider.typeSelectedProvider.notifier).state = false;
     }
+
+    ref.read(ToastProvider.isFromFormPageProvider.notifier).state = true;
 
     contentFieldController.clear();
 

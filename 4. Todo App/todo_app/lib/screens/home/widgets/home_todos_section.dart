@@ -81,7 +81,9 @@ class HomeTodosSection extends ConsumerWidget {
                                       )
                                     : Icon(
                                         Icons.assignment,
-                                        color: colors.onSurface,
+                                        color: highlightId.contains(todo.id)
+                                            ? colors.onPrimary
+                                            : colors.onSurface,
                                       ),
                                 title: TextButton(
                                   style: const ButtonStyle(
