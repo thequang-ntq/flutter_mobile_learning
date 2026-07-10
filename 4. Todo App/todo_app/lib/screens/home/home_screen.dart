@@ -1,14 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/providers/selection_provider.dart';
+import 'package:todo_app/providers/toast_provider.dart';
 import 'package:todo_app/providers/todo_provider.dart';
 import 'package:todo_app/screens/home/widgets/home_body.dart';
 import 'package:todo_app/screens/home/widgets/home_bottom_bar.dart';
-import 'package:todo_app/services/todo_service.dart';
+import 'package:todo_app/utils/toast_notification.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -18,152 +17,122 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  late Future<List<TodoModel>> _todos, _todosCompleted;
-  late SearchController _searchController, _searchControllerCompleted;
-  bool _typeSelected = false;
-  bool _isSearching = false, _isSearchingCompleted = false;
+  final ValueNotifier<Set<int>> _selectedTodoIds = ValueNotifier<Set<int>>({});
 
   @override
   void initState() {
     super.initState();
-    _loadTodos();
-    _searchController = SearchController();
-    _searchControllerCompleted = SearchController();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _searchControllerCompleted.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final todosSelected = _typeSelected ? _todosCompleted : _todos;
+    final typeSelected = ref.watch(SelectionProvider.typeSelectedProvider);
+
+    _setupToastListener();
 
     return Scaffold(
       body: HomeBody(
-        typeSelected: _typeSelected,
-        isSearching: _isSearching,
-        isSearchingCompleted: _isSearchingCompleted,
-        todos: todosSelected,
-        searchController: _searchController,
-        searchControllerCompleted: _searchControllerCompleted,
+        typeSelected: typeSelected,
         onTypeButtonPressed: _onTypeButtonPressed,
-        onSearchButtonPressed: _onSearchButtonPressed,
-        onClearSearchButtonPressed: _onClearSearchButtonPressed,
         onCircleButtonPressed: _onCircleButtonPressed,
         onSelectAllButtonPressed: _onSelectAllButtonPressed,
+        selectedTodoIds: _selectedTodoIds,
       ),
       bottomNavigationBar: HomeBottomBar(
-        typeSelected: _typeSelected,
+        typeSelected: typeSelected,
         onConfirmDialogPressed: _onConfirmDialogPressed,
+        selectedTodoIds: _selectedTodoIds,
       ),
     );
   }
 
-  void _loadTodos() {
-    _todos = TodoService.getByStatus(false);
-    _todosCompleted = TodoService.getByStatus(true);
-  }
-
+  // Change type: todo / done for tasks
   void _onTypeButtonPressed(String name) {
-    if ((!_typeSelected && name == "Done") ||
-        (_typeSelected && name == "To do")) {
-      setState(() {
-        _typeSelected = !_typeSelected;
-      });
+    final currentTypeSelected = ref.read(
+      SelectionProvider.typeSelectedProvider,
+    );
+
+    if ((!currentTypeSelected && name == "Done") ||
+        (currentTypeSelected && name == "To do")) {
+      ref.read(SelectionProvider.typeSelectedProvider.notifier).state =
+          !currentTypeSelected;
     }
   }
 
-  void _onSearchButtonPressed({
-    required String keyword,
-    required SearchController controller,
-  }) {
-    controller.closeView(keyword);
-
-    if (keyword.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter a keyword')));
-      return;
-    }
-
-    setState(() {
-      if (_typeSelected) {
-        _todosCompleted = TodoService.search(
-          keyword: keyword,
-          isCompleted: true,
-        );
-        _isSearchingCompleted = true;
-      } else {
-        _todos = TodoService.search(keyword: keyword, isCompleted: false);
-        _isSearching = true;
-      }
-    });
-  }
-
-  void _onClearSearchButtonPressed(SearchController controller) {
-    controller.clear();
-    setState(() {
-      if (_typeSelected) {
-        _todosCompleted = TodoService.getByStatus(true);
-        _isSearchingCompleted = false;
-      } else {
-        _todos = TodoService.getByStatus(false);
-        _isSearching = false;
-      }
-    });
-  }
-
+  // Change mode: Watch/selected mode (for check, uncheck, delete)
   void _onCircleButtonPressed(int todoId) {
     if (!ref.read(SelectionProvider.isSelectionModeProvider)) {
       ref.read(SelectionProvider.isSelectionModeProvider.notifier).enable();
     }
 
-    final selectedTodoIdsNotifier = ref.read(
-      SelectionProvider.selectedTodoIdsProvider.notifier,
-    );
-
-    if (selectedTodoIdsNotifier.contains(todoId)) {
-      selectedTodoIdsNotifier.remove(todoId);
+    final currentIds = Set<int>.from(_selectedTodoIds.value);
+    if (currentIds.contains(todoId)) {
+      currentIds.remove(todoId);
     } else {
-      selectedTodoIdsNotifier.add(todoId);
+      currentIds.add(todoId);
     }
+    _selectedTodoIds.value = currentIds;
   }
 
+  // Select all tasks in selected mode
   void _onSelectAllButtonPressed(List<TodoModel> todos) {
-    final selectedTodoIdsNotifier = ref.read(
-      SelectionProvider.selectedTodoIdsProvider.notifier,
-    );
-
-    if (selectedTodoIdsNotifier.length() == todos.length) {
-      selectedTodoIdsNotifier.clear();
+    if (_selectedTodoIds.value.length == todos.length) {
+      _selectedTodoIds.value = {};
     } else {
-      selectedTodoIdsNotifier.selectAll(todos.map((e) => e.id));
+      _selectedTodoIds.value = todos.map((e) => e.id).toSet();
     }
   }
 
-  void _onConfirmDialogPressed(String action) {
-    final selectedTodoIds = ref.watch(
-      SelectionProvider.selectedTodoIdsProvider,
+  // Select confirm for dialog in check/uncheck/delete function in selected mode
+  void _onConfirmDialogPressed(String action, bool typeSelected) {
+    final todosNotifier = ref.read(TodoProvider.todosProvider(false).notifier);
+    final todosCompletedNotifier = ref.read(
+      TodoProvider.todosProvider(true).notifier,
     );
-    final todosNotifier = ref.read(TodoProvider.todosProvider.notifier);
 
     switch (action) {
       case "check":
-        todosNotifier.setStatus(ids: selectedTodoIds, setCompleted: true);
+        todosNotifier.setStatus(
+          ids: _selectedTodoIds.value,
+          setCompleted: true,
+        );
+        ref.read(SelectionProvider.typeSelectedProvider.notifier).state = true;
       case "uncheck":
-        todosNotifier.setStatus(ids: selectedTodoIds, setCompleted: false);
+        todosCompletedNotifier.setStatus(
+          ids: _selectedTodoIds.value,
+          setCompleted: false,
+        );
+        ref.read(SelectionProvider.typeSelectedProvider.notifier).state = false;
       case "delete":
-        for (final item in selectedTodoIds) {
-          TodoService.delete(item);
-        }
+        typeSelected
+            ? todosCompletedNotifier.delete(_selectedTodoIds.value)
+            : todosNotifier.delete(_selectedTodoIds.value);
     }
 
-    ref.read(SelectionProvider.selectedTodoIdsProvider.notifier).clear();
+    _selectedTodoIds.value = {};
     context.pop();
     ref.read(SelectionProvider.isSelectionModeProvider.notifier).disable();
+  }
+
+  // Load add/update delete, check/uncheck success/failed notification using toast
+  void _setupToastListener() {
+    ref.listen(ToastProvider.toastProvider, (previous, next) {
+      if (next != null) {
+        if (next.status == "success") {
+          ToastNotification.showSuccess(context, message: next.message);
+        } else {
+          ToastNotification.showError(context, message: next.message);
+        }
+        Future.delayed(const Duration(seconds: 3), () {
+          ref.read(ToastProvider.toastProvider.notifier).state = null;
+
+          final idsNotifier = ref.read(
+            TodoProvider.highlightedTodoIdsProvider.notifier,
+          );
+
+          idsNotifier.state = {};
+        });
+      }
+    });
   }
 }

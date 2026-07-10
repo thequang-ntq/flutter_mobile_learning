@@ -1,20 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:todo_app/models/notification_message.dart';
 import 'package:todo_app/models/todo_model.dart';
+import 'package:todo_app/providers/toast_provider.dart';
 import 'package:todo_app/services/todo_service.dart';
 
 class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
+  final bool isCompleted;
+  TodosNotifier(this.isCompleted);
+
   // Build -> Get all tasks
   @override
   Future<List<TodoModel>> build() async {
-    return await TodoService.getAll();
+    return await TodoService.getByStatus(isCompleted);
   }
 
-  // Change current state with tasks by status
-  Future<void> getByStatus(bool isCompleted) async {
-    final resultTodos = await TodoService.getByStatus(isCompleted);
-
-    state = AsyncData(resultTodos);
+  Future<void> refresh() async {
+    state = AsyncData(await TodoService.getByStatus(isCompleted));
   }
 
   // Return a task by id
@@ -36,108 +38,146 @@ class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
   }
 
   // Clear list highlight ids before loops
-  // For list selected ids: update tasks's status in DB, update tasks for state (Provider)
+  // For list selected ids: update tasks's status in DB, update tasks for state (Provider) - delete updated task from state
+  // Add status todos on the top of status list
   // save tasks ids in highlight todo ids provider (add more to current ids,
   // Clear list highlight ids after loops 3 seconds, and call getByStatus again
   Future<void> setStatus({
     required Set<int> ids,
     required bool setCompleted,
   }) async {
-    final idsNotifier = ref.read(
-      TodoProvider.highlightedTodoIdsProvider.notifier,
-    );
-    idsNotifier.state = {};
-
-    var todos = state.requireValue;
-
-    for (final id in ids) {
-      final newTodo = await TodoService.setStatus(
-        id: id,
-        setCompleted: setCompleted,
+    try {
+      final idsNotifier = ref.read(
+        TodoProvider.highlightedTodoIdsProvider.notifier,
       );
 
-      if (newTodo == null) continue;
+      final targetNotifier = ref.read(
+        TodoProvider.todosProvider(setCompleted).notifier,
+      );
 
-      todos = todos.map((todo) {
-        return todo.id == id ? newTodo : todo;
-      }).toList();
+      var todos = state.requireValue;
+
+      for (final id in ids) {
+        final updatedTodo = await TodoService.setStatus(
+          id: id,
+          setCompleted: setCompleted,
+        );
+
+        if (updatedTodo != null) {
+          todos = todos.where((todo) => todo.id != id).toList();
+        }
+      }
+
+      state = AsyncData(todos);
+      await targetNotifier.refresh();
+
+      idsNotifier.state = {...ids};
+
+      ref
+          .read(ToastProvider.toastProvider.notifier)
+          .state = NotificationMessage(
+        message: "Change tasks's statuses successfully",
+        status: "success",
+      );
+    } catch (e) {
+      ref.read(ToastProvider.toastProvider.notifier).state =
+          NotificationMessage(message: e.toString(), status: "failed");
+      rethrow;
     }
-
-    state = AsyncData(todos);
-    idsNotifier.state = {...ids};
-
-    await Future.delayed(const Duration(seconds: 3));
-
-    if (!ref.mounted) return;
-
-    idsNotifier.state = {};
-    await getByStatus(setCompleted);
   }
 
   // Add tasks in DB, add task for state (Todos provider),
   // save task id in highlight todo ids provider (only this task's id)
-  // Call getByStatus again
+  // save message & status in toast provider
   Future<void> add(String content) async {
-    final newTodo = await TodoService.add(content);
-    final idsNotifier = ref.read(
-      TodoProvider.highlightedTodoIdsProvider.notifier,
-    );
+    try {
+      final newTodo = await TodoService.add(content);
+      final idsNotifier = ref.read(
+        TodoProvider.highlightedTodoIdsProvider.notifier,
+      );
 
-    if (newTodo != null) {
-      final todos = state.requireValue;
-      state = AsyncData([...todos, newTodo]);
+      if (newTodo != null) {
+        state = AsyncData([newTodo, ...state.requireValue]);
+        idsNotifier.state = {newTodo.id};
+      }
 
-      idsNotifier.state = {newTodo.id};
-
-      await Future.delayed(const Duration(seconds: 3));
-
-      if (!ref.mounted) return;
-
-      idsNotifier.state = {};
-      await getByStatus(newTodo.completed);
+      ref
+          .read(ToastProvider.toastProvider.notifier)
+          .state = NotificationMessage(
+        message: "Create task successfully",
+        status: "success",
+      );
+    } catch (e) {
+      ref.read(ToastProvider.toastProvider.notifier).state =
+          NotificationMessage(message: e.toString(), status: "failed");
+      rethrow;
     }
   }
 
   // Update task in DB, update task for state (Todo provider),
   // save task id in highlight todo ids provider (change current ids to this id)
-  // Call getByStatus again
+  // delete editingId
   Future<void> edit({required int id, required String updatedContent}) async {
-    final updatedTodo = await TodoService.update(
-      id: id,
-      updatedContent: updatedContent,
-    );
-    final idsNotifier = ref.read(
-      TodoProvider.highlightedTodoIdsProvider.notifier,
-    );
+    try {
+      final updatedTodo = await TodoService.update(
+        id: id,
+        updatedContent: updatedContent,
+      );
 
-    if (updatedTodo != null) {
-      var todos = state.requireValue;
-      todos = todos.map((todo) {
-        return todo.id == id ? updatedTodo : todo;
-      }).toList();
-      state = AsyncData(todos);
+      final idsNotifier = ref.read(
+        TodoProvider.highlightedTodoIdsProvider.notifier,
+      );
 
-      idsNotifier.state = {updatedTodo.id};
+      if (updatedTodo != null) {
+        var todos = state.requireValue;
+        todos = todos.map((todo) {
+          return todo.id == id ? updatedTodo : todo;
+        }).toList();
 
-      await Future.delayed(const Duration(seconds: 3));
+        state = AsyncData(todos);
+        idsNotifier.state = {updatedTodo.id};
 
-      if (!ref.mounted) return;
+        ref.read(TodoProvider.editingTodoIdProvider.notifier).state = null;
 
-      idsNotifier.state = {};
-      await getByStatus(updatedTodo.completed);
+        ref
+            .read(ToastProvider.toastProvider.notifier)
+            .state = NotificationMessage(
+          message: "Update task successfully",
+          status: "success",
+        );
+      }
+    } catch (e) {
+      ref.read(ToastProvider.toastProvider.notifier).state =
+          NotificationMessage(message: e.toString(), status: "failed");
+      rethrow;
     }
   }
 
-  // Delete task in DB, delete task for state (Todo provider),
-  // Call getByStatus again
-  Future<void> delete(int id) async {
-    final deletedTodo = await TodoService.getById(id);
-    bool isDeleted = await TodoService.delete(id);
-    if (isDeleted) {
-      final todos = state.requireValue;
+  // Delete tasks in DB, delete tasks for state (Todo provider)
+  Future<void> delete(Set<int> ids) async {
+    try {
+      var todos = state.requireValue;
 
-      state = AsyncData(todos.where((todo) => todo.id != id).toList());
-      await getByStatus(deletedTodo!.completed);
+      for (final id in ids) {
+        final isDeleted = await TodoService.delete(id);
+
+        if (isDeleted) {
+          todos = todos.where((todo) => todo.id != id).toList();
+        }
+      }
+
+      state = AsyncData(todos);
+
+      ref
+          .read(ToastProvider.toastProvider.notifier)
+          .state = NotificationMessage(
+        message: "Delete tasks successfully",
+        status: "success",
+      );
+    } catch (e) {
+      ref.read(ToastProvider.toastProvider.notifier).state =
+          NotificationMessage(message: e.toString(), status: "failed");
+      rethrow;
     }
   }
 }
@@ -145,10 +185,15 @@ class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
 class TodoProvider {
   TodoProvider._();
 
-  static final todosProvider =
-      AsyncNotifierProvider<TodosNotifier, List<TodoModel>>(TodosNotifier.new);
+  // List todo
+  static final todosProvider = AsyncNotifierProvider.autoDispose
+      .family<TodosNotifier, List<TodoModel>, bool>(TodosNotifier.new);
 
+  // List highlight id
   static final highlightedTodoIdsProvider = StateProvider<Set<int>>(
     (ref) => {},
   );
+
+  // Editing id
+  static final editingTodoIdProvider = StateProvider<int?>((ref) => null);
 }

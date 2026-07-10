@@ -5,12 +5,14 @@ import 'package:todo_app/widgets/confirm_dialog.dart';
 
 class HomeBottomBar extends ConsumerWidget {
   final bool typeSelected;
-  final Function(String) onConfirmDialogPressed;
+  final Function(String, bool) onConfirmDialogPressed;
+  final ValueNotifier<Set<int>> selectedTodoIds;
 
   const HomeBottomBar({
     super.key,
     required this.typeSelected,
     required this.onConfirmDialogPressed,
+    required this.selectedTodoIds,
   });
 
   @override
@@ -18,9 +20,6 @@ class HomeBottomBar extends ConsumerWidget {
     final colors = Theme.of(context).colorScheme;
     final isSelectionMode = ref.watch(
       SelectionProvider.isSelectionModeProvider,
-    );
-    final selectedTodoIds = ref.watch(
-      SelectionProvider.selectedTodoIdsProvider,
     );
 
     if (!isSelectionMode) return const SizedBox.shrink();
@@ -31,7 +30,7 @@ class HomeBottomBar extends ConsumerWidget {
       color: colors.surface,
       child: Row(
         children: [
-          if (selectedTodoIds.isNotEmpty)
+          if (selectedTodoIds.value.isNotEmpty)
             Expanded(
               child: IconButton(
                 onPressed: () => _showConfirmDialog(
@@ -46,7 +45,7 @@ class HomeBottomBar extends ConsumerWidget {
                     : Icon(Icons.check, color: colors.secondaryContainer),
               ),
             ),
-          if (selectedTodoIds.isNotEmpty)
+          if (selectedTodoIds.value.isNotEmpty)
             Expanded(
               child: IconButton(
                 onPressed: () => _showConfirmDialog(
@@ -83,6 +82,7 @@ class HomeBottomBar extends ConsumerWidget {
           title: title,
           content: content,
           action: action,
+          typeSelected: typeSelected,
         );
       },
     );
@@ -90,6 +90,6 @@ class HomeBottomBar extends ConsumerWidget {
 
   void _onClosePressed(WidgetRef ref) {
     ref.read(SelectionProvider.isSelectionModeProvider.notifier).disable();
-    ref.read(SelectionProvider.selectedTodoIdsProvider.notifier).clear();
+    selectedTodoIds.value.clear();
   }
 }

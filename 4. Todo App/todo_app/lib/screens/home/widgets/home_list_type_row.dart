@@ -6,11 +6,13 @@ import 'package:todo_app/providers/selection_provider.dart';
 class HomeListTypeRow extends ConsumerWidget {
   final bool typeSelected;
   final Function(String) onTypeButtonPressed;
+  final Set<int> selectedTodoIds;
 
   const HomeListTypeRow({
     super.key,
     required this.typeSelected,
     required this.onTypeButtonPressed,
+    required this.selectedTodoIds,
   });
 
   @override
@@ -19,11 +21,9 @@ class HomeListTypeRow extends ConsumerWidget {
     final colors = context.colors;
     final width = context.width;
     final height = context.height;
+
     final isSelectionMode = ref.watch(
       SelectionProvider.isSelectionModeProvider,
-    );
-    final selectedTodoIds = ref.watch(
-      SelectionProvider.selectedTodoIdsProvider,
     );
 
     return Stack(

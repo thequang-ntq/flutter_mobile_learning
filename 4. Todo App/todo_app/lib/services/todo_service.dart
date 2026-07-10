@@ -1,25 +1,31 @@
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:flutter/services.dart';
 import 'package:todo_app/models/todo_model.dart';
-import 'package:todo_app/utils/constants.dart';
 
 class TodoService {
+  static const String _todosKey = 'todos_list';
+
   static Future<List<TodoModel>> getAll() async {
-    final jsonString = await rootBundle.loadString(
-      "${Constants.baseJsonUrl}/todos.json",
-    );
-    final List<dynamic> jsonData = json.decode(jsonString);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = prefs.getString(_todosKey);
 
-    final todos = jsonData.map((e) {
-      return TodoModel.fromJson(e);
-    }).toList();
+      if (jsonString == null) {
+        return [];
+      }
 
-    todos.sort((a, b) {
-      return b.timestamp.compareTo(a.timestamp);
-    });
+      final List<dynamic> jsonData = json.decode(jsonString);
 
-    return todos;
+      final todos = jsonData.map((e) {
+        return TodoModel.fromJson(e);
+      }).toList();
+
+      todos.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      return todos;
+    } catch (e) {
+      return [];
+    }
   }
 
   static Future<List<TodoModel>> getByStatus(bool isCompleted) async {
@@ -59,81 +65,97 @@ class TodoService {
     required int id,
     required bool setCompleted,
   }) async {
-    final todos = await getAll();
-    final index = _findIndex(todos, id);
+    try {
+      final todos = await getAll();
+      final index = _findIndex(todos, id);
 
-    if (index == -1) return null;
+      if (index == -1) return null;
 
-    todos[index] = TodoModel(
-      id: todos[index].id,
-      content: todos[index].content,
-      completed: setCompleted,
-      timestamp: DateTime.now(),
-    );
+      todos[index] = TodoModel(
+        id: todos[index].id,
+        content: todos[index].content,
+        completed: setCompleted,
+        timestamp: DateTime.now(),
+      );
 
-    await _saveTodos(todos);
+      await _saveTodos(todos);
 
-    return todos[index];
+      return todos[index];
+    } catch (e) {
+      throw Exception("Failed to change statuses of tasks");
+    }
   }
 
   static Future<TodoModel?> add(String content) async {
-    final todos = await getAll();
-    final maxId = todos.isEmpty
-        ? 0
-        : todos
-              .map((e) {
-                return e.id;
-              })
-              .reduce((a, b) {
-                return a > b ? a : b;
-              });
+    try {
+      final todos = await getAll();
+      final maxId = todos.isEmpty
+          ? 0
+          : todos
+                .map((e) {
+                  return e.id;
+                })
+                .reduce((a, b) {
+                  return a > b ? a : b;
+                });
 
-    final newTodo = TodoModel(
-      id: maxId + 1,
-      content: content,
-      completed: false,
-      timestamp: DateTime.now(),
-    );
+      final newTodo = TodoModel(
+        id: maxId + 1,
+        content: content,
+        completed: false,
+        timestamp: DateTime.now(),
+      );
 
-    todos.add(newTodo);
-    await _saveTodos(todos);
+      todos.add(newTodo);
+      await _saveTodos(todos);
 
-    return newTodo;
+      return newTodo;
+    } catch (e) {
+      throw Exception("Failed to create task");
+    }
   }
 
   static Future<TodoModel?> update({
     required int id,
     required String updatedContent,
   }) async {
-    final todos = await getAll();
-    final index = _findIndex(todos, id);
+    try {
+      final todos = await getAll();
+      final index = _findIndex(todos, id);
 
-    if (index == -1) return null;
+      if (index == -1) return null;
 
-    todos[index] = TodoModel(
-      id: todos[index].id,
-      content: updatedContent,
-      completed: todos[index].completed,
-      timestamp: DateTime.now(),
-    );
+      todos[index] = TodoModel(
+        id: todos[index].id,
+        content: updatedContent,
+        completed: todos[index].completed,
+        timestamp: DateTime.now(),
+      );
 
-    await _saveTodos(todos);
+      await _saveTodos(todos);
 
-    return todos[index];
+      return todos[index];
+    } catch (e) {
+      throw Exception("Failed to update task");
+    }
   }
 
   static Future<bool> delete(int id) async {
-    final todos = await getAll();
-    final initialLength = todos.length;
+    try {
+      final todos = await getAll();
+      final initialLength = todos.length;
 
-    todos.removeWhere((todo) {
-      return todo.id == id;
-    });
+      todos.removeWhere((todo) {
+        return todo.id == id;
+      });
 
-    if (todos.length == initialLength) return false;
+      if (todos.length == initialLength) return false;
 
-    await _saveTodos(todos);
-    return true;
+      await _saveTodos(todos);
+      return true;
+    } catch (e) {
+      throw Exception("Failed to delete tasks");
+    }
   }
 
   static int _findIndex(List<TodoModel> todos, int id) {
@@ -143,6 +165,14 @@ class TodoService {
   }
 
   static Future<void> _saveTodos(List<TodoModel> todos) async {
-    // Use shared preferences to save into json file (root bundle just read)
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = json.encode(
+        todos.map((todo) => todo.toJson()).toList(),
+      );
+      await prefs.setString(_todosKey, jsonString);
+    } catch (e) {
+      throw Exception("Cannot save data");
+    }
   }
 }

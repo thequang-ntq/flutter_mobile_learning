@@ -50,10 +50,11 @@ class ShellScreen extends ConsumerWidget {
             onTap: (index) {
               navigationShell.goBranch(index);
             },
-
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
             items: const [
               BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-              BottomNavigationBarItem(icon: Icon(Icons.add), label: "Add"),
+              BottomNavigationBarItem(icon: Icon(Icons.add), label: "Add/Edit"),
             ],
           );
   }

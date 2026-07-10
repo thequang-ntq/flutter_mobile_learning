@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class ConfirmDialog extends StatelessWidget {
+  final Function(String, bool) onConfirmPressed;
+  final String title;
+  final String content;
+  final String action;
+  final bool typeSelected;
+
   const ConfirmDialog({
     super.key,
     required this.onConfirmPressed,
     required this.title,
     required this.content,
     required this.action,
+    required this.typeSelected,
   });
-
-  final Function(String) onConfirmPressed;
-  final String title;
-  final String content;
-  final String action;
 
   Color _createConfirmColor(ColorScheme colors) {
     return switch (action) {
@@ -53,7 +55,7 @@ class ConfirmDialog extends StatelessWidget {
             backgroundColor: WidgetStatePropertyAll(Colors.transparent),
           ),
           onPressed: () {
-            onConfirmPressed(action);
+            onConfirmPressed(action, typeSelected);
           },
           child: Text(
             "Confirm $action",

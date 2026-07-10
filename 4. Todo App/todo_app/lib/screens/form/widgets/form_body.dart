@@ -1,17 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/extensions/context_extension.dart';
+import 'package:todo_app/models/todo_model.dart';
 
-class FormBody extends StatelessWidget {
+class FormBody extends ConsumerStatefulWidget {
   final GlobalKey<FormState> formKey;
   final GlobalKey<FormFieldState> contentFieldKey;
   final TextEditingController contentFieldController;
+  final TodoModel? editTodo;
+  final Function(GlobalKey<FormState>, TextEditingController)
+  onFormButtonPressed;
 
   const FormBody({
     super.key,
     required this.formKey,
     required this.contentFieldKey,
     required this.contentFieldController,
+    required this.editTodo,
+    required this.onFormButtonPressed,
   });
+
+  @override
+  ConsumerState<FormBody> createState() => _FormBodyState();
+}
+
+class _FormBodyState extends ConsumerState<FormBody> {
+  @override
+  void initState() {
+    super.initState();
+    widget.contentFieldController.text = widget.editTodo?.content ?? "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,18 +44,18 @@ class FormBody extends StatelessWidget {
           width * 0.05,
           height * 0.035,
         ),
-        child: _buildForm(context),
+        child: _buildForm(context, ref: ref),
       ),
     );
   }
 
-  Widget _buildForm(BuildContext context) {
+  Widget _buildForm(BuildContext context, {required WidgetRef ref}) {
     final text = context.text;
     final colors = context.colors;
     final height = context.height;
 
     return Form(
-      key: formKey,
+      key: widget.formKey,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -45,14 +63,16 @@ class FormBody extends StatelessWidget {
             spacing: height * 0.04,
             children: [
               TextFormField(
-                key: contentFieldKey,
-                controller: contentFieldController,
+                key: widget.contentFieldKey,
+                controller: widget.contentFieldController,
                 keyboardType: TextInputType.multiline,
                 maxLines: 10,
                 cursorColor: colors.primary,
                 decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.always,
-                  labelText: "What's your task today?",
+                  labelText: widget.editTodo == null
+                      ? "What's your task today?"
+                      : "Edit your task's content",
                   labelStyle: text.titleLarge!.copyWith(
                     color: colors.onSurface,
                   ),
@@ -79,27 +99,34 @@ class FormBody extends StatelessWidget {
                   return null;
                 },
                 onTap: () {
-                  contentFieldKey.currentState!.clearError();
+                  widget.contentFieldKey.currentState!.clearError();
                 },
               ),
-              InputDecorator(
-                decoration: InputDecoration(
-                  labelText: "Last updated",
-                  labelStyle: text.titleLarge!.copyWith(
-                    color: colors.onSurface,
-                  ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(width: 2, color: colors.onSurface),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  filled: true,
-                  fillColor: colors.outlineVariant,
-                ),
-                child: Text(
-                  "todo timestamp here",
-                  style: text.labelLarge!.copyWith(color: colors.onSurface),
-                ),
-              ),
+              widget.editTodo != null
+                  ? InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: "Last updated",
+                        labelStyle: text.titleLarge!.copyWith(
+                          color: colors.onSurface,
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            width: 2,
+                            color: colors.onSurface,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        filled: true,
+                        fillColor: colors.outlineVariant,
+                      ),
+                      child: Text(
+                        "${widget.editTodo?.timestamp}",
+                        style: text.labelLarge!.copyWith(
+                          color: colors.onSurface,
+                        ),
+                      ),
+                    )
+                  : SizedBox.shrink(),
             ],
           ),
           SizedBox(
@@ -111,9 +138,14 @@ class FormBody extends StatelessWidget {
                 ),
                 backgroundColor: WidgetStatePropertyAll(colors.primary),
               ),
-              onPressed: () {},
+              onPressed: () {
+                widget.onFormButtonPressed(
+                  widget.formKey,
+                  widget.contentFieldController,
+                );
+              },
               child: Text(
-                "Add/Edit...",
+                widget.editTodo != null ? "Edit" : "Add",
                 style: text.titleLarge!.copyWith(color: colors.onPrimary),
               ),
             ),

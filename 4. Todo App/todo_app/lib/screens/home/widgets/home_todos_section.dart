@@ -1,22 +1,26 @@
-// lib/screens/home/widgets/home_todos_section.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:todo_app/extensions/context_extension.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/providers/selection_provider.dart';
+import 'package:todo_app/providers/todo_provider.dart';
 
 class HomeTodosSection extends ConsumerWidget {
   final bool typeSelected;
-  final Future<List<TodoModel>> todos;
+  final bool isSearching, isSearchingCompleted;
   final Function(int) onCircleButtonPressed;
   final Function(List<TodoModel>) onSelectAllButtonPressed;
+  final ValueNotifier<Set<int>> selectedTodoIds;
 
   const HomeTodosSection({
     super.key,
     required this.typeSelected,
-    required this.todos,
+    required this.isSearching,
+    required this.isSearchingCompleted,
     required this.onCircleButtonPressed,
     required this.onSelectAllButtonPressed,
+    required this.selectedTodoIds,
   });
 
   @override
@@ -26,18 +30,17 @@ class HomeTodosSection extends ConsumerWidget {
     final width = context.width;
     final height = context.height;
 
+    final todos = ref.watch(TodoProvider.todosProvider(typeSelected));
+    final todoList =
+        ref.watch(TodoProvider.todosProvider(typeSelected)).value ?? [];
+    final todoListOther =
+        ref.watch(TodoProvider.todosProvider(!typeSelected)).value ?? [];
+
     final isSelectionMode = ref.watch(
       SelectionProvider.isSelectionModeProvider,
     );
-    final isSelectionModeNotifier = ref.read(
-      SelectionProvider.isSelectionModeProvider.notifier,
-    );
-    final selectedTodoIds = ref.watch(
-      SelectionProvider.selectedTodoIdsProvider,
-    );
-    final selectedTodoIdsNotifier = ref.read(
-      SelectionProvider.selectedTodoIdsProvider.notifier,
-    );
+
+    final highlightId = ref.watch(TodoProvider.highlightedTodoIdsProvider);
 
     return Expanded(
       child: Padding(
@@ -47,120 +50,136 @@ class HomeTodosSection extends ConsumerWidget {
           width * 0.05,
           height * 0.025,
         ),
-        child: FutureBuilder<List<TodoModel>>(
-          future: todos,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final todoList = snapshot.data!;
+        child: todos.when(
+          data: (todos) {
+            return todoList.isNotEmpty
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ListView.separated(
+                          physics: const ClampingScrollPhysics(),
+                          itemCount: todos.length,
+                          itemBuilder: (context, index) {
+                            final todo = todos[index];
 
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      physics: const ClampingScrollPhysics(),
-                      itemCount: todoList.length,
-                      itemBuilder: (context, index) {
-                        final todo = todoList[index];
-
-                        return GestureDetector(
-                          onLongPress: () {
-                            _onLongPress(
-                              isSelectionMode: isSelectionMode,
-                              isSelectionModeNotifier: isSelectionModeNotifier,
-                              selectedTodoIdsNotifier: selectedTodoIdsNotifier,
-                              todo: todo,
-                            );
-                          },
-                          onTap: () {
-                            _onTodoPressed(
-                              isSelectionMode: isSelectionMode,
-                              selectedTodoIdsNotifier: selectedTodoIdsNotifier,
-                              todo: todo,
-                            );
-                          },
-                          child: ListTile(
-                            leading: typeSelected
-                                ? Icon(
-                                    Icons.assignment_turned_in,
-                                    color: colors.secondaryContainer,
-                                  )
-                                : Icon(
-                                    Icons.assignment,
-                                    color: colors.onSurface,
+                            return GestureDetector(
+                              onLongPress: () {
+                                _onLongPress(ref: ref, todo: todo);
+                              },
+                              onTap: () {
+                                _onTodoPressed(context, ref: ref, todo: todo);
+                              },
+                              child: ListTile(
+                                tileColor: highlightId.contains(todo.id)
+                                    ? colors.primary
+                                    : null,
+                                leading: typeSelected
+                                    ? Icon(
+                                        Icons.assignment_turned_in,
+                                        color: colors.secondaryContainer,
+                                      )
+                                    : Icon(
+                                        Icons.assignment,
+                                        color: colors.onSurface,
+                                      ),
+                                title: TextButton(
+                                  style: const ButtonStyle(
+                                    alignment: AlignmentGeometry.centerStart,
                                   ),
-                            title: TextButton(
-                              style: const ButtonStyle(
-                                alignment: AlignmentGeometry.centerStart,
-                              ),
-                              onPressed: () {
-                                _onTodoPressed(
-                                  isSelectionMode: isSelectionMode,
-                                  selectedTodoIdsNotifier:
-                                      selectedTodoIdsNotifier,
-                                  todo: todo,
-                                );
-                              },
-                              child: Text(
-                                todo.content,
-                                style: text.bodyLarge!.copyWith(
-                                  color: colors.onSurface,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            trailing: IconButton(
-                              onPressed: () {
-                                onCircleButtonPressed(todo.id);
-                              },
-                              icon: selectedTodoIds.contains(todo.id)
-                                  ? Icon(
-                                      Icons.check_circle,
-                                      color: colors.onPrimaryContainer,
-                                    )
-                                  : Icon(
-                                      Icons.circle_outlined,
-                                      color: colors.onSurface,
+                                  onPressed: () {
+                                    _onTodoPressed(
+                                      context,
+                                      ref: ref,
+                                      todo: todo,
+                                    );
+                                  },
+                                  child: Text(
+                                    todo.content,
+                                    style: text.bodyLarge!.copyWith(
+                                      color: highlightId.contains(todo.id)
+                                          ? colors.onPrimary
+                                          : colors.onSurface,
                                     ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  if (isSelectionMode)
-                    ElevatedButton(
-                      onPressed: () {
-                        onSelectAllButtonPressed(todoList);
-                      },
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(colors.primary),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                trailing: IconButton(
+                                  onPressed: () {
+                                    onCircleButtonPressed(todo.id);
+                                  },
+                                  icon: selectedTodoIds.value.contains(todo.id)
+                                      ? Icon(
+                                          Icons.check_circle,
+                                          color: colors.onPrimaryContainer,
+                                        )
+                                      : Icon(
+                                          Icons.circle_outlined,
+                                          color: highlightId.contains(todo.id)
+                                              ? colors.onPrimary
+                                              : colors.onSurface,
+                                        ),
+                                ),
+                              ),
+                            );
+                          },
+                          separatorBuilder: (context, index) {
+                            return SizedBox(height: height * 0.015);
+                          },
+                        ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Select all',
-                            style: text.titleLarge!.copyWith(
-                              color: colors.onPrimary,
+                      if (isSelectionMode)
+                        ElevatedButton(
+                          onPressed: () {
+                            onSelectAllButtonPressed(todos);
+                          },
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                              colors.primary,
                             ),
                           ),
-                          selectedTodoIds.length == todoList.length
-                              ? Icon(Icons.check_box, color: colors.onPrimary)
-                              : Icon(
-                                  Icons.check_box_outline_blank,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Select all',
+                                style: text.titleLarge!.copyWith(
                                   color: colors.onPrimary,
                                 ),
-                        ],
-                      ),
-                    ),
-                ],
-              );
-            } else if (snapshot.hasError) {
-              return Center(child: Text('${snapshot.error}'));
-            }
+                              ),
+                              selectedTodoIds.value.length == todos.length
+                                  ? Icon(
+                                      Icons.check_box,
+                                      color: colors.onPrimary,
+                                    )
+                                  : Icon(
+                                      Icons.check_box_outline_blank,
+                                      color: colors.onPrimary,
+                                    ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  )
+                : _buildEmptyText(
+                    context,
+                    todoList: todoList,
+                    todoListOther: todoListOther,
+                  );
+          },
 
+          error: (error, stackTrace) {
+            return Center(
+              child: Text(
+                "Error: $error",
+                style: text.titleLarge!.copyWith(color: colors.error),
+                textAlign: TextAlign.center,
+              ),
+            );
+          },
+
+          loading: () {
             return Center(
               child: CircularProgressIndicator(color: colors.onSurface),
             );
@@ -170,26 +189,106 @@ class HomeTodosSection extends ConsumerWidget {
     );
   }
 
-  void _onLongPress({
-    required bool isSelectionMode,
-    required IsSelectionModeNotifier isSelectionModeNotifier,
-    required SelectedTodoIdsNotifier selectedTodoIdsNotifier,
-    required TodoModel todo,
+  Widget _buildEmptyText(
+    BuildContext context, {
+    required List<TodoModel> todoList,
+    required List<TodoModel> todoListOther,
   }) {
+    final text = context.text;
+    final colors = context.colors;
+    final width = context.width;
+
+    late String emptyContent;
+    late Color emptyContentColor;
+
+    if (!typeSelected) {
+      if (!isSearching) {
+        if (todoListOther.isEmpty) {
+          emptyContent =
+              "Let's create some todo tasks by clicking the [+] button at the bottom of the app";
+          emptyContentColor = colors.primary;
+        } else {
+          emptyContent = "Congratulations! You have completed all todo tasks!";
+          emptyContentColor = colors.onSecondaryContainer;
+        }
+      } else {
+        emptyContent = "Cannot find any task related to the search condition";
+        emptyContentColor = colors.onSurface;
+      }
+    } else {
+      if (!isSearchingCompleted) {
+        if (todoListOther.isEmpty) {
+          emptyContent = "Let's create some todo tasks to complete them";
+          emptyContentColor = colors.primary;
+        } else {
+          emptyContent = "Maybe it's the time to complete some todo tasks.";
+          emptyContentColor = colors.onSurface;
+        }
+      } else {
+        emptyContent =
+            "Cannot find any completed task related to the search condition";
+        emptyContentColor = colors.onSurface;
+      }
+    }
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(width * 0.05, 0, width * 0.05, 0),
+      child: Center(
+        child: Text(
+          emptyContent,
+          style: text.titleLarge!.copyWith(color: emptyContentColor),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  void _onLongPress({required WidgetRef ref, required TodoModel todo}) {
+    final isSelectionMode = ref.watch(
+      SelectionProvider.isSelectionModeProvider,
+    );
+    final isSelectionModeNotifier = ref.read(
+      SelectionProvider.isSelectionModeProvider.notifier,
+    );
+
+    final currentIds = Set<int>.from(selectedTodoIds.value);
+
     if (!isSelectionMode) {
       isSelectionModeNotifier.enable();
-      selectedTodoIdsNotifier.add(todo.id);
+      currentIds.add(todo.id);
+      selectedTodoIds.value = currentIds;
     }
   }
 
-  void _onTodoPressed({
-    required bool isSelectionMode,
-    required SelectedTodoIdsNotifier selectedTodoIdsNotifier,
+  void _onTodoPressed(
+    BuildContext context, {
+    required WidgetRef ref,
     required TodoModel todo,
   }) {
+    final isSelectionMode = ref.watch(
+      SelectionProvider.isSelectionModeProvider,
+    );
+
+    final editingTodoIdNotifier = ref.read(
+      TodoProvider.editingTodoIdProvider.notifier,
+    );
+
+    final currentIds = Set<int>.from(selectedTodoIds.value);
+
     if (isSelectionMode) {
-      selectedTodoIdsNotifier.toggle(todo.id);
+      if (currentIds.contains(todo.id)) {
+        currentIds.remove(todo.id);
+      } else {
+        currentIds.add(todo.id);
+      }
+      selectedTodoIds.value = currentIds;
+
       return;
     }
+
+    if (typeSelected) return;
+
+    editingTodoIdNotifier.state = todo.id;
+    context.go('/form');
   }
 }

@@ -18,16 +18,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     with TickerProviderStateMixin {
   late PageController _pageViewController;
   late TabController? _tabController;
-  late Future<List<OnboardingSlideModel>> _slides;
-  int _totalSlides = 0;
+  late List<OnboardingSlideModel> _slides;
   int _currentPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _pageViewController = PageController();
-    _tabController = TabController(length: 0, vsync: this);
     _slides = OnboardingSlideService.getAll();
+    _pageViewController = PageController();
+    _tabController = TabController(length: _slides.length, vsync: this);
   }
 
   @override
@@ -50,43 +49,31 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         pageViewController: _pageViewController,
         tabController: _tabController,
         currentPageIndex: _currentPageIndex,
-        totalSlides: _totalSlides,
         slides: _slides,
         onPageChanged: _handlePageViewChanged,
-        onEnsureTabController: _ensureTabController,
         onUpdateCurrentPageIndex: _updateCurrentPageIndex,
       ),
       bottomNavigationBar: OnboardingBottomBar(
         currentPageIndex: _currentPageIndex,
-        totalSlides: _totalSlides,
+        totalSlides: _slides.length,
         onPrevPressed: () => _onButtonPressed(context, name: "Prev"),
         onNextPressed: () => _onButtonPressed(
           context,
-          name: _currentPageIndex == _totalSlides - 1 ? "Let's go" : "Next",
+          name: _currentPageIndex == _slides.length - 1 ? "Let's go" : "Next",
         ),
       ),
     );
   }
 
-  void _ensureTabController(int length) {
-    _totalSlides = length;
-    if (_tabController == null || _tabController!.length != length) {
-      _tabController?.dispose();
-      setState(() {
-        _tabController = TabController(length: length, vsync: this);
-      });
-    }
-  }
-
   void _handlePageViewChanged(int currentPageIndex) {
-    _tabController!.index = currentPageIndex;
+    _tabController?.index = currentPageIndex;
     setState(() {
       _currentPageIndex = currentPageIndex;
     });
   }
 
   void _updateCurrentPageIndex(int index) {
-    _tabController!.index = index;
+    _tabController?.index = index;
     _pageViewController.animateToPage(
       index,
       duration: const Duration(milliseconds: 400),
