@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:todo_app/models/notification_message.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/providers/selection_provider.dart';
 import 'package:todo_app/providers/toast_provider.dart';
@@ -22,13 +23,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _setupToastListener();
   }
 
   @override
   Widget build(BuildContext context) {
     final typeSelected = ref.watch(SelectionProvider.typeSelectedProvider);
-
-    _setupToastListener();
 
     return Scaffold(
       body: HomeBody(
@@ -116,7 +116,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // Load add/update delete, check/uncheck success/failed notification using toast
   void _setupToastListener() {
-    ref.listen(ToastProvider.toastProvider, (previous, next) {
+    ref.listenManual<NotificationMessage?>(ToastProvider.toastProvider, (
+      previous,
+      next,
+    ) {
       if (next != null) {
         if (next.status == "success") {
           ToastNotification.showSuccess(context, message: next.message);

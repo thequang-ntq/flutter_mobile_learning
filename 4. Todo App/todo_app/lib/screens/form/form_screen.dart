@@ -18,7 +18,6 @@ class _FormScreenState extends ConsumerState<FormScreen> {
   late GlobalKey<FormState> _formKey;
   late GlobalKey<FormFieldState> _contentFieldKey;
   late TextEditingController _contentFieldController;
-  TodoModel? _editTodo;
 
   @override
   void initState() {
@@ -26,7 +25,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
     _formKey = GlobalKey<FormState>();
     _contentFieldKey = GlobalKey<FormFieldState>();
     _contentFieldController = TextEditingController();
-    _loadTodo();
+    _setContentWhenEdit();
   }
 
   @override
@@ -46,20 +45,9 @@ class _FormScreenState extends ConsumerState<FormScreen> {
         formKey: _formKey,
         contentFieldKey: _contentFieldKey,
         contentFieldController: _contentFieldController,
-        editTodo: _editTodo,
         onFormButtonPressed: _onFormButtonPressed,
       ),
     );
-  }
-
-  Future<void> _loadTodo() async {
-    final editingTodoId = ref.read(TodoProvider.editingTodoIdProvider);
-
-    if (editingTodoId == null) return;
-
-    _editTodo = await ref
-        .read(TodoProvider.todosProvider(_editTodo!.completed).notifier)
-        .getById(editingTodoId);
   }
 
   void _onFormButtonPressed(
@@ -67,10 +55,16 @@ class _FormScreenState extends ConsumerState<FormScreen> {
     TextEditingController contentFieldController,
   ) async {
     if (!formKey.currentState!.validate()) return;
-    if (_editTodo != null) {
+
+    final editingTodo = ref.read(TodoProvider.editingTodoProvider).value;
+
+    if (editingTodo != null) {
       await ref
-          .read(TodoProvider.todosProvider(_editTodo!.completed).notifier)
-          .edit(id: _editTodo!.id, updatedContent: contentFieldController.text);
+          .read(TodoProvider.todosProvider(editingTodo.completed).notifier)
+          .edit(
+            id: editingTodo.id,
+            updatedContent: contentFieldController.text,
+          );
     } else {
       await ref
           .read(TodoProvider.todosProvider(false).notifier)
@@ -80,10 +74,32 @@ class _FormScreenState extends ConsumerState<FormScreen> {
 
     ref.read(ToastProvider.isFromFormPageProvider.notifier).state = true;
 
-    contentFieldController.clear();
-
     if (mounted) {
       context.go("/home");
     }
+  }
+
+  void _setContentWhenEdit() {
+    ref.listenManual<AsyncValue<TodoModel?>>(TodoProvider.editingTodoProvider, (
+      previous,
+      next,
+    ) {
+      final previousTodo = previous?.value;
+      final currentTodo = next.value;
+      final editingTodoId = ref.read(TodoProvider.editingTodoIdProvider);
+
+      // Edit -> Add
+      if (previousTodo != null &&
+          currentTodo == null &&
+          editingTodoId != null) {
+        _contentFieldController.clear();
+        return;
+      }
+
+      // Add -> Edit
+      if (currentTodo != null) {
+        _contentFieldController.text = currentTodo.content;
+      }
+    });
   }
 }

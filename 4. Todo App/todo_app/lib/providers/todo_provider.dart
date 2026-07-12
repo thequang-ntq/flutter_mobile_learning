@@ -212,4 +212,13 @@ class TodoProvider {
 
   // Editing id
   static final editingTodoIdProvider = StateProvider<int?>((ref) => null);
+
+  // Editing todo
+  static final editingTodoProvider = FutureProvider<TodoModel?>((ref) async {
+    final id = ref.watch(TodoProvider.editingTodoIdProvider);
+
+    if (id == null) return null;
+
+    return await TodoService.getById(id);
+  });
 }

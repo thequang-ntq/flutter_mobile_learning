@@ -31,8 +31,6 @@ class HomeTodosSection extends ConsumerWidget {
     final height = context.height;
 
     final todos = ref.watch(TodoProvider.todosProvider(typeSelected));
-    final todoList =
-        ref.watch(TodoProvider.todosProvider(typeSelected)).value ?? [];
     final todoListOther =
         ref.watch(TodoProvider.todosProvider(!typeSelected)).value ?? [];
 
@@ -52,7 +50,7 @@ class HomeTodosSection extends ConsumerWidget {
         ),
         child: todos.when(
           data: (todos) {
-            return todoList.isNotEmpty
+            return todos.isNotEmpty
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -166,7 +164,7 @@ class HomeTodosSection extends ConsumerWidget {
                   )
                 : _buildEmptyText(
                     context,
-                    todoList: todoList,
+                    todoList: todos,
                     todoListOther: todoListOther,
                   );
           },
@@ -262,6 +260,7 @@ class HomeTodosSection extends ConsumerWidget {
     }
   }
 
+  // Handle when press todo -> check mode: add/remove check ids. todo (not done) -> change to form page to edit
   void _onTodoPressed(
     BuildContext context, {
     required WidgetRef ref,

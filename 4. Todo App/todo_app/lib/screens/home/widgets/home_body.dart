@@ -37,6 +37,7 @@ class _HomeBodyState extends ConsumerState<HomeBody> {
     super.initState();
     _searchController = SearchController();
     _searchControllerCompleted = SearchController();
+    _getCurrentSearchStateAfterForm();
   }
 
   @override
@@ -48,17 +49,6 @@ class _HomeBodyState extends ConsumerState<HomeBody> {
 
   @override
   Widget build(BuildContext context) {
-    // Search when from FormPage to HomePage after add/edit, and searched before add/edit
-    ref.listen(ToastProvider.isFromFormPageProvider, (previous, next) {
-      if (!next) return;
-
-      ref
-          .read(TodoProvider.todosProvider(widget.typeSelected).notifier)
-          .refresh();
-
-      ref.read(ToastProvider.isFromFormPageProvider.notifier).state = false;
-    });
-
     return SafeArea(
       child: ValueListenableBuilder<Set<int>>(
         valueListenable: widget.selectedTodoIds,
@@ -131,6 +121,22 @@ class _HomeBodyState extends ConsumerState<HomeBody> {
       widget.typeSelected
           ? _isSearchingCompleted = false
           : _isSearching = false;
+    });
+  }
+
+  void _getCurrentSearchStateAfterForm() {
+    // Search when from FormPage to HomePage after add/edit, and searched before add/edit
+    ref.listenManual<bool>(ToastProvider.isFromFormPageProvider, (
+      previous,
+      next,
+    ) {
+      if (!next) return;
+
+      ref
+          .read(TodoProvider.todosProvider(widget.typeSelected).notifier)
+          .refresh();
+
+      ref.read(ToastProvider.isFromFormPageProvider.notifier).state = false;
     });
   }
 }
