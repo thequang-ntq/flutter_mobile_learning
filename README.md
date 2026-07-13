@@ -13,6 +13,7 @@
     - [2026-06-28](#2026-06-28)
     - [2026-06-29](#2026-06-29)
     - [2026-06-30](#2026-06-30)
+    - [2026-07-13](#2026-07-13)
   - [UI Screenshots](#ui-screenshots)
   - [Time Tracking](#time-tracking)
   - [Future Work](#future-work)
@@ -69,6 +70,17 @@
    -> Fix in 1.2
    1.4. Need route management for navigator (go_router)
    -> Install go_router, create router/router.dart, create router (GoRouter), change Navigator to context.go/push/pop
+
+### 2026-07-13
+
+FAILURE: Build failed with an exception.
+
+- What went wrong:
+  Execution failed for task ':shared_preferences_android:compileReleaseKotlin'.
+  > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+  > java.lang.Exception: Could not close incremental caches in C:\Users\USER\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.26\android\build\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+
+-> Solution: Disable kotlin.incremental in android/gradle.properties: kotlin.incremental=false
 
 ## UI Screenshots
 
