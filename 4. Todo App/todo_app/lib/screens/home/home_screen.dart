@@ -92,13 +92,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     switch (action) {
       case "check":
-        todosNotifier.setStatus(
+        todosNotifier.setStatuses(
           ids: _selectedTodoIds.value,
           setCompleted: true,
         );
         ref.read(SelectionProvider.typeSelectedProvider.notifier).state = true;
       case "uncheck":
-        todosCompletedNotifier.setStatus(
+        todosCompletedNotifier.setStatuses(
           ids: _selectedTodoIds.value,
           setCompleted: false,
         );

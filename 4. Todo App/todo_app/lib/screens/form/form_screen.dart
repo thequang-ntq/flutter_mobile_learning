@@ -72,6 +72,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
       ref.read(SelectionProvider.typeSelectedProvider.notifier).state = false;
     }
 
+    _contentFieldController.clear();
     ref.read(ToastProvider.isFromFormPageProvider.notifier).state = true;
 
     if (mounted) {
@@ -86,12 +87,9 @@ class _FormScreenState extends ConsumerState<FormScreen> {
     ) {
       final previousTodo = previous?.value;
       final currentTodo = next.value;
-      final editingTodoId = ref.read(TodoProvider.editingTodoIdProvider);
 
       // Edit -> Add
-      if (previousTodo != null &&
-          currentTodo == null &&
-          editingTodoId != null) {
+      if (previousTodo != null && currentTodo == null) {
         _contentFieldController.clear();
         return;
       }

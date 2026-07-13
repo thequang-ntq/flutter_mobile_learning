@@ -9,7 +9,6 @@ class OnboardingSlideContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = context.width;
     final height = context.height;
 
     return SingleChildScrollView(
@@ -17,24 +16,28 @@ class OnboardingSlideContent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         spacing: height * 0.03,
-        children: [_buildImage(width), _buildTextContent(context, height)],
+        children: [_buildImage(context), _buildTextContent(context)],
       ),
     );
   }
 
-  Widget _buildImage(double width) {
+  Widget _buildImage(BuildContext context) {
+    final width = context.width;
+    // final height = context.height;
+
     return Container(
       padding: EdgeInsets.fromLTRB(width * 0.07, 0, width * 0.07, 0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child: Image(image: AssetImage(slide.imageUrl), fit: BoxFit.cover),
+        child: Image.asset(slide.imageUrl, fit: BoxFit.contain),
       ),
     );
   }
 
-  Widget _buildTextContent(BuildContext context, double height) {
+  Widget _buildTextContent(BuildContext context) {
     final text = context.text;
     final colors = context.colors;
+    final height = context.height;
 
     return Column(
       spacing: height * 0.015,

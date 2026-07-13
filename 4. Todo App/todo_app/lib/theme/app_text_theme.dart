@@ -5,7 +5,7 @@ class AppTextTheme {
       .copyWith(
         headlineLarge: TextStyle(fontWeight: FontWeight.bold),
         titleLarge: TextStyle(fontWeight: FontWeight.w800),
-        bodyLarge: TextStyle(fontWeight: FontWeight.w500),
+        bodyLarge: TextStyle(fontWeight: FontWeight.w600),
       );
   static final TextTheme darkTextTheme = Typography.material2021().white;
 }

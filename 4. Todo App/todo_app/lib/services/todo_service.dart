@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_app/models/todo_model.dart';
 
 class TodoService {
-  static const String _todosKey = 'todos_list';
+  static const String _todosKey = 'todoList';
 
   static Future<List<TodoModel>> getAll() async {
     try {
@@ -61,26 +61,29 @@ class TodoService {
     }).toList();
   }
 
-  static Future<TodoModel?> setStatus({
-    required int id,
+  static Future<List<TodoModel>> setStatuses({
+    required Set<int> ids,
     required bool setCompleted,
   }) async {
     try {
       final todos = await getAll();
-      final index = _findIndex(todos, id);
 
-      if (index == -1) return null;
+      for (final id in ids) {
+        final index = _findIndex(todos, id);
 
-      todos[index] = TodoModel(
-        id: todos[index].id,
-        content: todos[index].content,
-        completed: setCompleted,
-        timestamp: DateTime.now(),
-      );
+        if (index == -1) return todos;
+
+        todos[index] = TodoModel(
+          id: todos[index].id,
+          content: todos[index].content,
+          completed: setCompleted,
+          timestamp: DateTime.now(),
+        );
+      }
 
       await _saveTodos(todos);
 
-      return todos[index];
+      return todos;
     } catch (e) {
       throw Exception("Failed to change statuses of tasks");
     }
@@ -140,14 +143,20 @@ class TodoService {
     }
   }
 
-  static Future<bool> delete(int id) async {
+  static Future<bool> delete(Set<int> ids) async {
     try {
       final todos = await getAll();
       final initialLength = todos.length;
 
-      todos.removeWhere((todo) {
-        return todo.id == id;
-      });
+      for (final id in ids) {
+        final index = _findIndex(todos, id);
+
+        if (index == -1) return false;
+
+        todos.removeWhere((todo) {
+          return todo.id == id;
+        });
+      }
 
       if (todos.length == initialLength) return false;
 

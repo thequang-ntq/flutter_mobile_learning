@@ -56,7 +56,7 @@ class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
   // Add status todos on the top of status list
   // save tasks ids in highlight todo ids provider (add more to current ids,
   // Clear list highlight ids after loops 3 seconds, and call getByStatus again
-  Future<void> setStatus({
+  Future<void> setStatuses({
     required Set<int> ids,
     required bool setCompleted,
   }) async {
@@ -69,23 +69,18 @@ class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
         TodoProvider.todosProvider(setCompleted).notifier,
       );
 
-      var todos = state.requireValue;
+      final allTodos = await TodoService.setStatuses(
+        ids: ids,
+        setCompleted: setCompleted,
+      );
 
-      for (final id in ids) {
-        final updatedTodo = await TodoService.setStatus(
-          id: id,
-          setCompleted: setCompleted,
-        );
-
-        if (updatedTodo != null) {
-          todos = todos.where((todo) => todo.id != id).toList();
-        }
-      }
+      var todos = allTodos.where((todo) {
+        return todo.completed == isCompleted;
+      }).toList();
 
       state = AsyncData(todos);
 
       await targetNotifier.refresh();
-      await refresh();
 
       idsNotifier.state = {...ids};
 
@@ -174,15 +169,13 @@ class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
     try {
       var todos = state.requireValue;
 
-      for (final id in ids) {
-        final isDeleted = await TodoService.delete(id);
+      final isDeleted = await TodoService.delete(ids);
 
-        if (isDeleted) {
-          todos = todos.where((todo) => todo.id != id).toList();
-        }
+      if (isDeleted) {
+        state = AsyncData(
+          todos.where((todo) => !ids.contains(todo.id)).toList(),
+        );
       }
-
-      state = AsyncData(todos);
 
       ref
           .read(ToastProvider.toastProvider.notifier)

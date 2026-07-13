@@ -16,7 +16,7 @@ class OnboardingAppBar extends StatelessWidget implements PreferredSizeWidget {
     final text = context.text;
 
     return AppBar(
-      backgroundColor: colors.primary,
+      backgroundColor: colors.inversePrimary,
       actions: [
         AnimatedMoveButton(
           isVisible: true,
@@ -24,7 +24,7 @@ class OnboardingAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: onSkipPressed,
           backgroundColor: Colors.transparent,
           name: "Skip",
-          textStyle: text.labelLarge!,
+          textStyle: text.bodyLarge!,
           color: colors.onPrimary,
         ),
       ],

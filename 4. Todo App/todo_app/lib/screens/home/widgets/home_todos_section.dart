@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:todo_app/data/skeleton_todos_data.dart';
 import 'package:todo_app/extensions/context_extension.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/providers/selection_provider.dart';
@@ -31,14 +33,9 @@ class HomeTodosSection extends ConsumerWidget {
     final height = context.height;
 
     final todos = ref.watch(TodoProvider.todosProvider(typeSelected));
-    final todoListOther =
-        ref.watch(TodoProvider.todosProvider(!typeSelected)).value ?? [];
+    final todoListOther = ref.watch(TodoProvider.todosProvider(!typeSelected));
 
-    final isSelectionMode = ref.watch(
-      SelectionProvider.isSelectionModeProvider,
-    );
-
-    final highlightId = ref.watch(TodoProvider.highlightedTodoIdsProvider);
+    final skeletonTodos = SkeletonTodosData.skeletonTodos;
 
     return Expanded(
       child: Padding(
@@ -51,116 +48,11 @@ class HomeTodosSection extends ConsumerWidget {
         child: todos.when(
           data: (todos) {
             return todos.isNotEmpty
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: ListView.separated(
-                          physics: const ClampingScrollPhysics(),
-                          itemCount: todos.length,
-                          itemBuilder: (context, index) {
-                            final todo = todos[index];
-
-                            return GestureDetector(
-                              onLongPress: () {
-                                _onLongPress(ref: ref, todo: todo);
-                              },
-                              onTap: () {
-                                _onTodoPressed(context, ref: ref, todo: todo);
-                              },
-                              child: ListTile(
-                                tileColor: highlightId.contains(todo.id)
-                                    ? colors.primary
-                                    : null,
-                                leading: typeSelected
-                                    ? Icon(
-                                        Icons.assignment_turned_in,
-                                        color: colors.secondaryContainer,
-                                      )
-                                    : Icon(
-                                        Icons.assignment,
-                                        color: highlightId.contains(todo.id)
-                                            ? colors.onPrimary
-                                            : colors.onSurface,
-                                      ),
-                                title: TextButton(
-                                  style: const ButtonStyle(
-                                    alignment: AlignmentGeometry.centerStart,
-                                  ),
-                                  onPressed: () {
-                                    _onTodoPressed(
-                                      context,
-                                      ref: ref,
-                                      todo: todo,
-                                    );
-                                  },
-                                  child: Text(
-                                    todo.content,
-                                    style: text.bodyLarge!.copyWith(
-                                      color: highlightId.contains(todo.id)
-                                          ? colors.onPrimary
-                                          : colors.onSurface,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                trailing: IconButton(
-                                  onPressed: () {
-                                    onCircleButtonPressed(todo.id);
-                                  },
-                                  icon: selectedTodoIds.value.contains(todo.id)
-                                      ? Icon(
-                                          Icons.check_circle,
-                                          color: colors.onPrimaryContainer,
-                                        )
-                                      : Icon(
-                                          Icons.circle_outlined,
-                                          color: highlightId.contains(todo.id)
-                                              ? colors.onPrimary
-                                              : colors.onSurface,
-                                        ),
-                                ),
-                              ),
-                            );
-                          },
-                          separatorBuilder: (context, index) {
-                            return SizedBox(height: height * 0.015);
-                          },
-                        ),
-                      ),
-                      if (isSelectionMode)
-                        ElevatedButton(
-                          onPressed: () {
-                            onSelectAllButtonPressed(todos);
-                          },
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStatePropertyAll(
-                              colors.primary,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Select all',
-                                style: text.titleLarge!.copyWith(
-                                  color: colors.onPrimary,
-                                ),
-                              ),
-                              selectedTodoIds.value.length == todos.length
-                                  ? Icon(
-                                      Icons.check_box,
-                                      color: colors.onPrimary,
-                                    )
-                                  : Icon(
-                                      Icons.check_box_outline_blank,
-                                      color: colors.onPrimary,
-                                    ),
-                            ],
-                          ),
-                        ),
-                    ],
+                ? _buildTodoList(
+                    context,
+                    ref: ref,
+                    todos: todos,
+                    isLoading: false,
                   )
                 : _buildEmptyText(
                     context,
@@ -180,8 +72,11 @@ class HomeTodosSection extends ConsumerWidget {
           },
 
           loading: () {
-            return Center(
-              child: CircularProgressIndicator(color: colors.onSurface),
+            return _buildTodoList(
+              context,
+              ref: ref,
+              todos: skeletonTodos,
+              isLoading: true,
             );
           },
         ),
@@ -192,24 +87,25 @@ class HomeTodosSection extends ConsumerWidget {
   Widget _buildEmptyText(
     BuildContext context, {
     required List<TodoModel> todoList,
-    required List<TodoModel> todoListOther,
+    required AsyncValue<List<TodoModel>> todoListOther,
   }) {
     final text = context.text;
     final colors = context.colors;
     final width = context.width;
+    final targetList = todoListOther.value ?? [];
 
     late String emptyContent;
     late Color emptyContentColor;
 
     if (!typeSelected) {
       if (!isSearching) {
-        if (todoListOther.isEmpty) {
+        if (targetList.isEmpty) {
           emptyContent =
               "Let's create some todo tasks by clicking the [+] button at the bottom of the app";
           emptyContentColor = colors.primary;
         } else {
           emptyContent = "Congratulations! You have completed all todo tasks!";
-          emptyContentColor = colors.onSecondaryContainer;
+          emptyContentColor = colors.secondaryContainer;
         }
       } else {
         emptyContent = "Cannot find any task related to the search condition";
@@ -217,7 +113,7 @@ class HomeTodosSection extends ConsumerWidget {
       }
     } else {
       if (!isSearchingCompleted) {
-        if (todoListOther.isEmpty) {
+        if (targetList.isEmpty) {
           emptyContent = "Let's create some todo tasks to complete them";
           emptyContentColor = colors.primary;
         } else {
@@ -291,5 +187,129 @@ class HomeTodosSection extends ConsumerWidget {
 
     editingTodoIdNotifier.state = todo.id;
     context.go('/form');
+  }
+
+  Widget _buildTodoList(
+    BuildContext context, {
+    required WidgetRef ref,
+    required List<TodoModel> todos,
+    required bool isLoading,
+  }) {
+    final height = context.height;
+    final colors = context.colors;
+    final text = context.text;
+
+    final isSelectionMode = ref.watch(
+      SelectionProvider.isSelectionModeProvider,
+    );
+
+    final highlightId = ref.watch(TodoProvider.highlightedTodoIdsProvider);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Skeletonizer(
+            enabled: isLoading,
+            child: IgnorePointer(
+              ignoring: isLoading,
+              child: ListView.separated(
+                physics: const ClampingScrollPhysics(),
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  final todo = todos[index];
+
+                  return GestureDetector(
+                    onLongPress: () {
+                      _onLongPress(ref: ref, todo: todo);
+                    },
+                    onTap: () {
+                      _onTodoPressed(context, ref: ref, todo: todo);
+                    },
+                    child: ListTile(
+                      tileColor: highlightId.contains(todo.id)
+                          ? colors.primary
+                          : null,
+                      leading: typeSelected
+                          ? Icon(
+                              Icons.assignment_turned_in,
+                              color: colors.secondaryContainer,
+                            )
+                          : Icon(
+                              Icons.assignment,
+                              color: highlightId.contains(todo.id)
+                                  ? colors.onPrimary
+                                  : colors.onSurface,
+                            ),
+                      title: TextButton(
+                        style: const ButtonStyle(
+                          alignment: AlignmentGeometry.centerStart,
+                        ),
+                        onPressed: () {
+                          _onTodoPressed(context, ref: ref, todo: todo);
+                        },
+                        child: Text(
+                          todo.content,
+                          style: text.bodyLarge!.copyWith(
+                            color: highlightId.contains(todo.id)
+                                ? colors.onPrimary
+                                : colors.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        onPressed: () {
+                          onCircleButtonPressed(todo.id);
+                        },
+                        icon: selectedTodoIds.value.contains(todo.id)
+                            ? Icon(
+                                Icons.check_circle,
+                                color: colors.onPrimaryContainer,
+                              )
+                            : Icon(
+                                Icons.circle_outlined,
+                                color: highlightId.contains(todo.id)
+                                    ? colors.onPrimary
+                                    : colors.onSurface,
+                              ),
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return SizedBox(height: height * 0.015);
+                },
+              ),
+            ),
+          ),
+        ),
+        if (isSelectionMode)
+          ElevatedButton(
+            onPressed: () {
+              onSelectAllButtonPressed(todos);
+            },
+            style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll(colors.primary),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Select all',
+                  style: text.titleLarge!.copyWith(color: colors.onPrimary),
+                ),
+                selectedTodoIds.value.length == todos.length
+                    ? Icon(Icons.check_box, color: colors.onPrimary)
+                    : Icon(
+                        Icons.check_box_outline_blank,
+                        color: colors.onPrimary,
+                      ),
+              ],
+            ),
+          ),
+      ],
+    );
   }
 }

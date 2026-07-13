@@ -24,6 +24,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   void initState() {
     super.initState();
+    _checkOnboarding();
     _slides = OnboardingSlideService.getAll();
     _pageViewController = PageController();
     _tabController = TabController(length: _slides.length, vsync: this);
@@ -41,9 +42,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: colors.primary,
+      backgroundColor: colors.inversePrimary,
       appBar: OnboardingAppBar(
-        onSkipPressed: () => _onButtonPressed(context, name: "Skip"),
+        onSkipPressed: () => _onButtonPressed(name: "Skip"),
       ),
       body: OnboardingBody(
         pageViewController: _pageViewController,
@@ -56,9 +57,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       bottomNavigationBar: OnboardingBottomBar(
         currentPageIndex: _currentPageIndex,
         totalSlides: _slides.length,
-        onPrevPressed: () => _onButtonPressed(context, name: "Prev"),
+        onPrevPressed: () => _onButtonPressed(name: "Prev"),
         onNextPressed: () => _onButtonPressed(
-          context,
           name: _currentPageIndex == _slides.length - 1 ? "Let's go" : "Next",
         ),
       ),
@@ -81,14 +81,29 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  void _onButtonPressed(BuildContext context, {required String name}) {
+  Future<void> _onButtonPressed({required String name}) async {
     if (name == "Let's go" || name == "Skip") {
-      context.go("/home");
+      await OnboardingSlideService.setHasSeenOnboarding();
+
+      if (mounted) {
+        context.go("/home");
+      }
+
       return;
     }
 
     _currentPageIndex += name == "Next" ? 1 : -1;
     _handlePageViewChanged(_currentPageIndex);
     _updateCurrentPageIndex(_currentPageIndex);
+  }
+
+  Future<void> _checkOnboarding() async {
+    final hasSeen = await OnboardingSlideService.hasSeenOnboarding();
+
+    if (!mounted) return;
+
+    if (hasSeen) {
+      context.go('/home');
+    }
   }
 }

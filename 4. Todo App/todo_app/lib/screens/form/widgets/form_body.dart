@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/data/skeleton_todos_data.dart';
 import 'package:todo_app/extensions/context_extension.dart';
+import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/providers/todo_provider.dart';
 
 class FormBody extends ConsumerStatefulWidget {
@@ -44,114 +46,15 @@ class _FormBodyState extends ConsumerState<FormBody> {
   Widget _buildForm(BuildContext context, {required WidgetRef ref}) {
     final text = context.text;
     final colors = context.colors;
-    final height = context.height;
+    // final height = context.height;
     final editTodo = ref.watch(TodoProvider.editingTodoProvider);
+    final skeletonEditTodo = SkeletonTodosData.skeletonTodos[0];
 
     return editTodo.when(
       data: (todo) {
         return Form(
           key: widget.formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                spacing: height * 0.04,
-                children: [
-                  TextFormField(
-                    key: widget.contentFieldKey,
-                    controller: widget.contentFieldController,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 10,
-                    cursorColor: colors.primary,
-                    decoration: InputDecoration(
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                      labelText: todo == null
-                          ? "What's your task today?"
-                          : "Edit your task's content",
-                      labelStyle: text.titleLarge!.copyWith(
-                        color: colors.onSurface,
-                      ),
-                      hintText: "For example: Read a book...",
-                      hintStyle: text.labelLarge!.copyWith(
-                        color: colors.outline,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: 2,
-                          color: colors.onSurface,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(width: 2, color: colors.primary),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(width: 2, color: colors.error),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter task's content";
-                      }
-
-                      return null;
-                    },
-                    onTap: () {
-                      widget.contentFieldKey.currentState!.clearError();
-                    },
-                  ),
-                  todo != null
-                      ? InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: "Last updated",
-                            labelStyle: text.titleLarge!.copyWith(
-                              color: colors.onSurface,
-                            ),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                width: 2,
-                                color: colors.onSurface,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            filled: true,
-                            fillColor: colors.outlineVariant,
-                          ),
-                          child: Text(
-                            "${todo.timestamp}",
-                            style: text.labelLarge!.copyWith(
-                              color: colors.onSurface,
-                            ),
-                          ),
-                        )
-                      : SizedBox.shrink(),
-                ],
-              ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    padding: WidgetStatePropertyAll(
-                      EdgeInsets.fromLTRB(0, height * 0.015, 0, height * 0.015),
-                    ),
-                    backgroundColor: WidgetStatePropertyAll(colors.primary),
-                  ),
-                  onPressed: () {
-                    widget.onFormButtonPressed(
-                      widget.formKey,
-                      widget.contentFieldController,
-                    );
-                  },
-                  child: Text(
-                    todo != null ? "Edit" : "Add",
-                    style: text.titleLarge!.copyWith(color: colors.onPrimary),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          child: _buildFormContent(context, todo: todo),
         );
       },
       error: (error, stackTrace) {
@@ -165,10 +68,107 @@ class _FormBodyState extends ConsumerState<FormBody> {
       },
 
       loading: () {
-        return Center(
-          child: CircularProgressIndicator(color: colors.onSurface),
-        );
+        return _buildFormContent(context, todo: skeletonEditTodo);
       },
+    );
+  }
+
+  Widget _buildFormContent(BuildContext context, {required TodoModel? todo}) {
+    final text = context.text;
+    final colors = context.colors;
+    final height = context.height;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          spacing: height * 0.04,
+          children: [
+            TextFormField(
+              key: widget.contentFieldKey,
+              controller: widget.contentFieldController,
+              keyboardType: TextInputType.multiline,
+              maxLines: 10,
+              cursorColor: colors.primary,
+              decoration: InputDecoration(
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                labelText: todo == null
+                    ? "What's your task today?"
+                    : "Edit your task's content",
+                labelStyle: text.titleLarge!.copyWith(color: colors.onSurface),
+                hintText: "For example: Read a book...",
+                hintStyle: text.labelLarge!.copyWith(color: colors.outline),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: colors.onSurface),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: colors.primary),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: colors.error),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please enter task's content";
+                }
+
+                return null;
+              },
+              onTap: () {
+                widget.contentFieldKey.currentState!.clearError();
+              },
+            ),
+            todo != null
+                ? InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: "Last updated",
+                      labelStyle: text.titleLarge!.copyWith(
+                        color: colors.onSurface,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          width: 2,
+                          color: colors.onSurface,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      filled: true,
+                      fillColor: colors.outlineVariant,
+                    ),
+                    child: Text(
+                      "${todo.timestamp}",
+                      style: text.labelLarge!.copyWith(color: colors.onSurface),
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ],
+        ),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ButtonStyle(
+              padding: WidgetStatePropertyAll(
+                EdgeInsets.fromLTRB(0, height * 0.015, 0, height * 0.015),
+              ),
+              backgroundColor: WidgetStatePropertyAll(colors.primary),
+            ),
+            onPressed: () {
+              widget.onFormButtonPressed(
+                widget.formKey,
+                widget.contentFieldController,
+              );
+            },
+            child: Text(
+              todo != null ? "Edit" : "Add",
+              style: text.titleLarge!.copyWith(color: colors.onPrimary),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
