@@ -5,6 +5,9 @@ import 'package:todo_app/models/todo_model.dart';
 
 class TodoService {
   static const String _todosKey = 'todoList';
+  static const String _searchHistoryKey = 'searchHistory';
+  static const String _searchHistoryCompletedKey = 'searchHistoryCompleted';
+  static const int _maxHistory = 5;
 
   static Future<List<TodoModel>> getAll() async {
     try {
@@ -48,6 +51,7 @@ class TodoService {
     }
   }
 
+  // Search
   static Future<List<TodoModel>> search({
     required String keyword,
     required bool isCompleted,
@@ -59,6 +63,35 @@ class TodoService {
       return todo.completed == isCompleted &&
           todo.content.toLowerCase().contains(lowerKeyword);
     }).toList();
+  }
+
+  static Future<List<String>> getSearchHistory(bool isCompleted) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = isCompleted ? _searchHistoryCompletedKey : _searchHistoryKey;
+
+    return prefs.getStringList(key) ?? [];
+  }
+
+  // Delete if keyword already in list and get the current keyword to the top of list
+  static Future<void> saveSearchKeyword({
+    required String keyword,
+    required bool isCompleted,
+  }) async {
+    if (keyword.isEmpty) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final key = isCompleted ? _searchHistoryCompletedKey : _searchHistoryKey;
+
+    final history = prefs.getStringList(key) ?? [];
+
+    history.removeWhere((e) => e.toLowerCase() == keyword.toLowerCase());
+    history.insert(0, keyword);
+
+    if (history.length > _maxHistory) {
+      history.removeRange(_maxHistory, history.length);
+    }
+
+    await prefs.setStringList(key, history);
   }
 
   static Future<List<TodoModel>> setStatuses({

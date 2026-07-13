@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:todo_app/models/notification_message.dart';
 import 'package:todo_app/models/todo_model.dart';
+import 'package:todo_app/providers/search_provider.dart';
 import 'package:todo_app/providers/toast_provider.dart';
 import 'package:todo_app/services/todo_service.dart';
 
@@ -45,6 +46,13 @@ class TodosNotifier extends AsyncNotifier<List<TodoModel>> {
     );
 
     state = AsyncData(resultTodos);
+
+    await TodoService.saveSearchKeyword(
+      keyword: keyword,
+      isCompleted: isCompleted,
+    );
+
+    ref.invalidate(SearchProvider.searchHistoryProvider(isCompleted));
   }
 
   void clearSearch() {

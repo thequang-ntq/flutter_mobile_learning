@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:todo_app/data/skeleton_todos_data.dart';
 import 'package:todo_app/extensions/context_extension.dart';
+import 'package:todo_app/providers/search_provider.dart';
 import 'package:todo_app/providers/selection_provider.dart';
 import 'package:todo_app/providers/todo_provider.dart';
 
@@ -44,6 +47,10 @@ class HomeSearchSection extends ConsumerWidget {
 
     final todoList =
         ref.watch(TodoProvider.todosProvider(typeSelected)).value ?? [];
+
+    final searchHistory = ref.watch(
+      SearchProvider.searchHistoryProvider(typeSelected),
+    );
 
     return (todoList.isNotEmpty || isSearchingUsed)
         ? Stack(
@@ -100,19 +107,44 @@ class HomeSearchSection extends ConsumerWidget {
                             : null,
                       );
                     },
-                    suggestionsBuilder: (BuildContext context, _) {
-                      return List<ListTile>.generate(5, (int index) {
-                        final String item = 'item $index';
-                        return ListTile(
-                          title: Text(item),
-                          onTap: () {
-                            onSearchButtonPressed(
-                              keyword: item,
-                              controller: controller,
+                    suggestionsBuilder: (context, controller) {
+                      final skeletonSearchHistory = List<String>.from(
+                        SkeletonTodosData.skeletonTodos
+                            .map((todo) => todo.content)
+                            .toList(),
+                      );
+
+                      return searchHistory.when(
+                        data: (history) {
+                          return _buildSuggestionList(
+                            context,
+                            history: history,
+                            controller: controller,
+                            isLoading: false,
+                          );
+                        },
+                        error: (error, stackTrace) {
+                          return List<ListTile>.generate(1, (_) {
+                            return ListTile(
+                              title: Text(
+                                "Error: $error",
+                                style: text.titleLarge!.copyWith(
+                                  color: colors.error,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             );
-                          },
-                        );
-                      });
+                          });
+                        },
+                        loading: () {
+                          return _buildSuggestionList(
+                            context,
+                            history: skeletonSearchHistory,
+                            controller: controller,
+                            isLoading: true,
+                          );
+                        },
+                      );
                     },
                   ),
                 ),
@@ -126,5 +158,33 @@ class HomeSearchSection extends ConsumerWidget {
             ],
           )
         : SizedBox.shrink();
+  }
+
+  List<Widget> _buildSuggestionList(
+    BuildContext context, {
+    required List<String> history,
+    required SearchController controller,
+    required bool isLoading,
+  }) {
+    final text = context.text;
+    final colors = context.colors;
+
+    return history.map((keyword) {
+      return Skeletonizer(
+        enabled: isLoading,
+        child: IgnorePointer(
+          ignoring: isLoading,
+          child: ListTile(
+            title: Text(
+              keyword,
+              style: text.bodyLarge!.copyWith(color: colors.onSurface),
+            ),
+            onTap: () {
+              onSearchButtonPressed(keyword: keyword, controller: controller);
+            },
+          ),
+        ),
+      );
+    }).toList();
   }
 }

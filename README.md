@@ -115,7 +115,7 @@
 | 2026-07-10               | Fix logic related to main functions: notify & highlight for add, check, delete; info when search not found for Todo App                                        | .     |
 | 2026-07-11               | Fix logic related to main functions: add back to todo list when search before, check/uncheck still have status, edit for Todo App                              | .     |
 | 2026-07-12               | Fix logic related to edit functions: change content when home -> edit, no when edit -> app, app -> edit, no when edit -> home -> setStatus -> add for Todo App | .     |
-| 2026-07-13               | Completed Todo App                                                                                                                                             | .     |
+| 2026-07-13               | Complete Todo App                                                                                                                                              | .     |
 
 ## Future Work
 
